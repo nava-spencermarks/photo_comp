@@ -1,0 +1,7 @@
+# Face Recognition Dependencies
+opencv-python
+face-recognition
+git+https://github.com/ageitgey/face_recognition_models
+numpy
+pillow
+setuptools
