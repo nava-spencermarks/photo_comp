@@ -120,7 +120,7 @@ def run_all_tests():
         print("Please review the failed tests above for details.")
     
     print("\n💡 To run individual test suites:")
-    print("   python test_robust_face_compare.py")
+    print("   python test_face_compare.py")
     print("   python test_main.py")
     
     return all_passed

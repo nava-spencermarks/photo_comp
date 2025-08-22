@@ -153,9 +153,10 @@ class TestIntegration(unittest.TestCase):
         for f in os.listdir('.'):
             if f.lower().endswith(('.png', '.jpg', '.jpeg')):
                 image_files.append(f)
-        for f in os.listdir('test_data'):
-            if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                image_files.append(f'test_data/{f}')
+        if os.path.exists('test_data'):
+            for f in os.listdir('test_data'):
+                if f.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    image_files.append(f'test_data/{f}')
         
         if len(image_files) >= 2:
             img1, img2 = image_files[0], image_files[1]

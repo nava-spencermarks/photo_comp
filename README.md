@@ -70,7 +70,7 @@ python run_all_tests.py
 cd test
 
 # Test core face comparison logic
-python test_robust_face_compare.py
+python test_face_compare.py
 
 # Test main script functionality  
 python test_main.py

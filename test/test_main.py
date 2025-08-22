@@ -25,8 +25,9 @@ class TestMainScript(unittest.TestCase):
     
     def run_main_script(self, args):
         """Run the main script with given arguments."""
-        cmd = [sys.executable, '../src/main.py'] + args
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd='.')
+        script_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'main.py')
+        cmd = [sys.executable, script_path] + args
+        result = subprocess.run(cmd, capture_output=True, text=True)
         return result
     
     def test_no_arguments(self):
@@ -34,14 +35,14 @@ class TestMainScript(unittest.TestCase):
         result = self.run_main_script([])
         
         self.assertNotEqual(result.returncode, 0)  # Should fail
-        self.assertIn("Usage:", result.stdout)
+        self.assertIn("Usage:", result.stdout + result.stderr)
     
     def test_one_argument(self):
         """Test main script with only one argument."""
         result = self.run_main_script(['image1.png'])
         
         self.assertNotEqual(result.returncode, 0)  # Should fail
-        self.assertIn("Usage:", result.stdout)
+        self.assertIn("Usage:", result.stdout + result.stderr)
     
     def test_nonexistent_files(self):
         """Test main script with nonexistent files."""
@@ -58,9 +59,10 @@ class TestMainScript(unittest.TestCase):
         for f in os.listdir('.'):
             if f.lower().endswith(('.png', '.jpg', '.jpeg')):
                 image_files.append(f)
-        for f in os.listdir('test_data'):
-            if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                image_files.append(f'test_data/{f}')
+        if os.path.exists('test_data'):
+            for f in os.listdir('test_data'):
+                if f.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    image_files.append(f'test_data/{f}')
         
         if len(image_files) >= 2:
             img1, img2 = image_files[0], image_files[1]
