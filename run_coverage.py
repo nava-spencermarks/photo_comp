@@ -29,8 +29,8 @@ def run_local_coverage():
             "--cov-report=xml",
             "-v",
             "test/test_inspect_image.py",
-            "test/test_main.py", 
-            "test/test_face_compare.py"
+            "test/test_main.py",
+            "test/test_face_compare.py",
         ],
         # Fallback: run our test runner with coverage
         [
@@ -42,8 +42,8 @@ def run_local_coverage():
             "-m",
             "pytest",
             "test/test_inspect_image.py",
-            "test/test_main.py", 
-            "test/test_face_compare.py"
+            "test/test_main.py",
+            "test/test_face_compare.py",
         ],
     ]
 
