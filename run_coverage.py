@@ -99,10 +99,11 @@ def run_local_coverage():
     # Check for coverage regression
     try:
         print("\n📊 Checking coverage regression...")
-        result = subprocess.run([
-            sys.executable, "coverage_tracker.py", "--tolerance", "2.0"
-        ], cwd=project_root)
-        
+        result = subprocess.run(
+            [sys.executable, "coverage_tracker.py", "--tolerance", "2.0"],
+            cwd=project_root,
+        )
+
         if result.returncode != 0:
             print("❌ Coverage regression detected! Build should fail.")
             return False

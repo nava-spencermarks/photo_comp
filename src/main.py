@@ -27,13 +27,13 @@ def main():
 
     if is_same_person:
         if isinstance(details, dict):
-            confidence = details.get('confidence', 0)
+            confidence = details.get("confidence", 0)
             print(f"✅ SAME PERSON (confidence: {confidence:.1f}%)")
         else:
             print(f"✅ SAME PERSON - {details}")
     else:
         if isinstance(details, dict):
-            distance = details.get('distance', 'N/A')
+            distance = details.get("distance", "N/A")
             print(f"❌ DIFFERENT PEOPLE (distance: {distance})")
         else:
             print(f"❌ DIFFERENT PEOPLE - {details}")
