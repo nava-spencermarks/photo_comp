@@ -66,8 +66,9 @@ class TestFaceComparator(unittest.TestCase):
     def test_identical_images(self):
         """Test comparison of identical images."""
         # Use existing test images - they MUST exist
-        image1_path = 'test_data/face_me_1.png'
-        image2_path = 'test_data/face_me_1.png'  # Same file
+        test_dir = os.path.join(os.path.dirname(__file__), 'test_data')
+        image1_path = os.path.join(test_dir, 'face_me_1.png')
+        image2_path = os.path.join(test_dir, 'face_me_1.png')  # Same file
         
         self.assertTrue(os.path.exists(image1_path), f"Required test image missing: {image1_path}")
         
@@ -79,8 +80,9 @@ class TestFaceComparator(unittest.TestCase):
     def test_different_images(self):
         """Test comparison of different face images."""
         # Use existing test images - they MUST exist
-        image1_path = 'test_data/face_me_1.png'
-        image2_path = 'test_data/me_different.png'
+        test_dir = os.path.join(os.path.dirname(__file__), 'test_data')
+        image1_path = os.path.join(test_dir, 'face_me_1.png')
+        image2_path = os.path.join(test_dir, 'me_different.png')
         
         self.assertTrue(os.path.exists(image1_path), f"Required test image missing: {image1_path}")
         self.assertTrue(os.path.exists(image2_path), f"Required test image missing: {image2_path}")
@@ -152,8 +154,9 @@ class TestIntegration(unittest.TestCase):
     def test_with_actual_images(self):
         """Test with actual images in the directory."""
         # Use specific known test images - they MUST exist
-        img1 = 'test_data/face_me_1.png'
-        img2 = 'test_data/me_different.png'
+        test_dir = os.path.join(os.path.dirname(__file__), 'test_data')
+        img1 = os.path.join(test_dir, 'face_me_1.png')
+        img2 = os.path.join(test_dir, 'me_different.png')
         
         self.assertTrue(os.path.exists(img1), f"Required test image missing: {img1}")
         self.assertTrue(os.path.exists(img2), f"Required test image missing: {img2}")

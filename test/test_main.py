@@ -55,8 +55,9 @@ class TestMainScript(unittest.TestCase):
     def test_with_actual_images(self):
         """Test main script with actual image files."""
         # Use specific known test images - they MUST exist
-        img1 = 'test_data/face_me_1.png'
-        img2 = 'test_data/me_different.png'
+        test_dir = os.path.join(os.path.dirname(__file__), 'test_data')
+        img1 = os.path.join(test_dir, 'face_me_1.png')
+        img2 = os.path.join(test_dir, 'me_different.png')
         
         self.assertTrue(os.path.exists(img1), f"Required test image missing: {img1}")
         self.assertTrue(os.path.exists(img2), f"Required test image missing: {img2}")
