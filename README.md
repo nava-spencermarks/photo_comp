@@ -177,10 +177,10 @@ Edit `src/robust_face_compare.py` and modify the tolerance parameter:
 
 ```python
 # Stricter matching (fewer false positives)
-comparator = RobustFaceComparator(tolerance=0.3)
+comparator = FaceComparator(tolerance=0.3)
 
 # More lenient matching  
-comparator = RobustFaceComparator(tolerance=0.6)
+comparator = FaceComparator(tolerance=0.6)
 ```
 
 **Default:** `0.45` (recommended for accuracy)

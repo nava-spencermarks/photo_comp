@@ -16,7 +16,7 @@ from PIL import Image, ImageEnhance, ImageOps
 import os
 
 
-class RobustFaceComparator:
+class FaceComparator:
     def __init__(self, tolerance=0.45):
         self.tolerance = tolerance
         self.face_cascade = cv2.CascadeClassifier(

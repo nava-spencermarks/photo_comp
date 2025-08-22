@@ -96,6 +96,21 @@ def run_local_coverage():
     print("\n" + "=" * 60)
     print("✅ Coverage analysis complete!")
 
+    # Check for coverage regression
+    try:
+        print("\n📊 Checking coverage regression...")
+        result = subprocess.run([
+            sys.executable, "coverage_tracker.py", "--tolerance", "2.0"
+        ], cwd=project_root)
+        
+        if result.returncode != 0:
+            print("❌ Coverage regression detected! Build should fail.")
+            return False
+        else:
+            print("✅ Coverage regression check passed.")
+    except Exception as e:
+        print(f"⚠️  Could not check coverage regression: {e}")
+
     return True
 
 

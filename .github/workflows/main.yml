@@ -75,7 +75,6 @@ jobs:
       if: matrix.python-version == '3.11'
       run: |
         python coverage_tracker.py --tolerance 2.0
-      continue-on-error: true
     
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11'

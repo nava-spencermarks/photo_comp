@@ -8,7 +8,7 @@ import os
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(__file__))
-from face_compare import RobustFaceComparator
+from face_compare import FaceComparator
 
 
 def main():
@@ -21,14 +21,22 @@ def main():
     image2_path = sys.argv[2]
 
     print(f"Comparing {image1_path} vs {image2_path}")
-    
-    comparator = RobustFaceComparator()
+
+    comparator = FaceComparator()
     is_same_person, details = comparator.compare_faces(image1_path, image2_path)
-    
+
     if is_same_person:
-        print(f"✅ SAME PERSON (confidence: {details.get('confidence', 0):.1f}%)")
+        if isinstance(details, dict):
+            confidence = details.get('confidence', 0)
+            print(f"✅ SAME PERSON (confidence: {confidence:.1f}%)")
+        else:
+            print(f"✅ SAME PERSON - {details}")
     else:
-        print(f"❌ DIFFERENT PEOPLE (distance: {details.get('distance', 'N/A')})")
+        if isinstance(details, dict):
+            distance = details.get('distance', 'N/A')
+            print(f"❌ DIFFERENT PEOPLE (distance: {distance})")
+        else:
+            print(f"❌ DIFFERENT PEOPLE - {details}")
 
 
 if __name__ == "__main__":

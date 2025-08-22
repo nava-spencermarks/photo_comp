@@ -13,13 +13,13 @@ import numpy as np
 
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-from face_compare import RobustFaceComparator
+from face_compare import FaceComparator
 
-class TestRobustFaceComparator(unittest.TestCase):
+class TestFaceComparator(unittest.TestCase):
     
     def setUp(self):
         """Set up test environment."""
-        self.comparator = RobustFaceComparator()
+        self.comparator = FaceComparator()
         self.test_dir = tempfile.mkdtemp()
         
     def tearDown(self):
@@ -105,10 +105,10 @@ class TestRobustFaceComparator(unittest.TestCase):
     
     def test_tolerance_setting(self):
         """Test different tolerance settings."""
-        strict_comparator = RobustFaceComparator(tolerance=0.3)
+        strict_comparator = FaceComparator(tolerance=0.3)
         self.assertEqual(strict_comparator.tolerance, 0.3)
         
-        loose_comparator = RobustFaceComparator(tolerance=0.7)
+        loose_comparator = FaceComparator(tolerance=0.7)
         self.assertEqual(loose_comparator.tolerance, 0.7)
     
     def test_preprocess_image_variations(self):
@@ -144,7 +144,7 @@ class TestIntegration(unittest.TestCase):
     """Integration tests using actual image files."""
     
     def setUp(self):
-        self.comparator = RobustFaceComparator()
+        self.comparator = FaceComparator()
     
     def test_with_actual_images(self):
         """Test with actual images in the directory."""
@@ -206,7 +206,7 @@ def run_tests():
     suite = unittest.TestSuite()
     
     # Add test classes
-    suite.addTests(loader.loadTestsFromTestCase(TestRobustFaceComparator))
+    suite.addTests(loader.loadTestsFromTestCase(TestFaceComparator))
     suite.addTests(loader.loadTestsFromTestCase(TestIntegration))
     
     # Run tests
