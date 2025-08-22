@@ -8,7 +8,7 @@ import os
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(__file__))
-from robust_face_compare import RobustFaceComparator
+from face_compare import RobustFaceComparator
 
 def main():
     if len(sys.argv) != 3:

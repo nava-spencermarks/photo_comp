@@ -29,31 +29,31 @@ python src/main.py image1.png image2.png
 
 **Example:**
 ```bash
-python src/main.py test/test_data/dana.png test/test_data/me2.png
+python src/main.py test/test_data/face_me_1.png test/test_data/me_different.png
 ```
 
 **Output:**
 ```
-Comparing dana.png vs me2.png
+Comparing face_me_1.png vs me_different.png
 ============================================================
-Analyzing dana.png...
+Analyzing face_me_1.png...
   ✓ HOG found 1 faces
-Image 1: Found 1 faces using HOG on Original
+Image 1: Found 1 faces using HOG on Original resized
 
-Analyzing me2.png...
-  ✓ HOG found 2 faces  
-Image 2: Found 2 faces using HOG on Original resized
+Analyzing me_different.png...
+  ✓ HOG found 1 faces  
+Image 2: Found 1 faces using HOG on Original
 
-Comparing 1 faces vs 2 faces...
+Comparing 1 faces vs 1 faces...
 
 ============================================================
 FINAL RESULT:
 ------------------------------------------------------------
-Best match distance: 0.796
+Best match distance: 0.579
 Similarity threshold: 0.45
 Confidence: 0.0%
 ❌ DIFFERENT PEOPLE
-   Closest similarity: 0.796 (above threshold)
+   Closest similarity: 0.579 (above threshold)
 ============================================================
 ```
 
@@ -126,11 +126,11 @@ photo-comp/
     ├── run_all_tests.py       # Test runner
     ├── test_robust_face_compare.py  # Core logic tests
     ├── test_main.py           # Main script tests
-    ├── test_data/             # Test images
-    │   ├── dana.png          # Sample face image
-    │   └── me2.png           # Sample face image
-    ├── IMG_0149.png          # Test image (no detectable faces)
-    └── IMG_0149_Duplicate.png # Duplicate test image
+    └── test_data/             # Test images
+        ├── face_me_1.png     # Sample face image
+        ├── me_different.png  # Sample different person
+        ├── no_faces_1.png    # Image with no faces
+        └── ...               # Additional test images
 ```
 
 ## 💡 Usage Tips
