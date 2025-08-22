@@ -54,29 +54,21 @@ class TestMainScript(unittest.TestCase):
     
     def test_with_actual_images(self):
         """Test main script with actual image files."""
-        # Look for existing images in test directory
-        image_files = []
-        for f in os.listdir('.'):
-            if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                image_files.append(f)
-        if os.path.exists('test_data'):
-            for f in os.listdir('test_data'):
-                if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    image_files.append(f'test_data/{f}')
+        # Use specific known test images - they MUST exist
+        img1 = 'test_data/face_me_1.png'
+        img2 = 'test_data/me_different.png'
         
-        if len(image_files) >= 2:
-            img1, img2 = image_files[0], image_files[1]
-            result = self.run_main_script([img1, img2])
-            
-            # Should complete (success or graceful failure)
-            self.assertIsInstance(result.returncode, int)
-            
-            # Should produce some output
-            output = result.stdout + result.stderr
-            self.assertGreater(len(output.strip()), 0)
-            
-        else:
-            self.skipTest("Need at least 2 image files for testing")
+        self.assertTrue(os.path.exists(img1), f"Required test image missing: {img1}")
+        self.assertTrue(os.path.exists(img2), f"Required test image missing: {img2}")
+        
+        result = self.run_main_script([img1, img2])
+        
+        # Should complete (success or graceful failure)
+        self.assertIsInstance(result.returncode, int)
+        
+        # Should produce some output
+        output = result.stdout + result.stderr
+        self.assertGreater(len(output.strip()), 0)
     
     def test_help_like_arguments(self):
         """Test script behavior with help-like arguments."""

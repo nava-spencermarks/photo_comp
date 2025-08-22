@@ -65,27 +65,30 @@ class TestFaceComparator(unittest.TestCase):
     
     def test_identical_images(self):
         """Test comparison of identical images."""
-        # Use existing test images if available, otherwise create simple ones
-        if os.path.exists('test_data/face_me_1.png'):
-            image1_path = 'test_data/face_me_1.png'
-            image2_path = 'test_data/face_me_1.png'  # Same file
-            
-            is_same, details = self.comparator.compare_faces(image1_path, image2_path)
-            # Should be same if faces are detected, but we'll just test it doesn't crash
-            self.assertIsInstance(is_same, bool)
-            self.assertIsInstance(details, str)
-        else:
-            self.skipTest("No test images available")
+        # Use existing test images - they MUST exist
+        image1_path = 'test_data/face_me_1.png'
+        image2_path = 'test_data/face_me_1.png'  # Same file
+        
+        self.assertTrue(os.path.exists(image1_path), f"Required test image missing: {image1_path}")
+        
+        is_same, details = self.comparator.compare_faces(image1_path, image2_path)
+        # Should be same if faces are detected, but we'll just test it doesn't crash
+        self.assertIsInstance(is_same, bool)
+        self.assertIsInstance(details, str)
     
     def test_different_images(self):
         """Test comparison of different face images."""
-        if os.path.exists('test_data/face_me_1.png') and os.path.exists('test_data/me_different.png'):
-            is_same, details = self.comparator.compare_faces('test_data/face_me_1.png', 'test_data/me_different.png')
-            # Should detect as different people (or at least not crash)
-            self.assertIsInstance(is_same, bool)
-            self.assertIsInstance(details, str)
-        else:
-            self.skipTest("No test images available")
+        # Use existing test images - they MUST exist
+        image1_path = 'test_data/face_me_1.png'
+        image2_path = 'test_data/me_different.png'
+        
+        self.assertTrue(os.path.exists(image1_path), f"Required test image missing: {image1_path}")
+        self.assertTrue(os.path.exists(image2_path), f"Required test image missing: {image2_path}")
+        
+        is_same, details = self.comparator.compare_faces(image1_path, image2_path)
+        # Should detect as different people (or at least not crash)
+        self.assertIsInstance(is_same, bool)
+        self.assertIsInstance(details, str)
     
     def test_no_face_images(self):
         """Test with images that have no faces."""
@@ -148,26 +151,19 @@ class TestIntegration(unittest.TestCase):
     
     def test_with_actual_images(self):
         """Test with actual images in the directory."""
-        # Look for images in test directory and test_data
-        image_files = []
-        for f in os.listdir('.'):
-            if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                image_files.append(f)
-        if os.path.exists('test_data'):
-            for f in os.listdir('test_data'):
-                if f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    image_files.append(f'test_data/{f}')
+        # Use specific known test images - they MUST exist
+        img1 = 'test_data/face_me_1.png'
+        img2 = 'test_data/me_different.png'
         
-        if len(image_files) >= 2:
-            img1, img2 = image_files[0], image_files[1]
-            print(f"\nTesting with {img1} vs {img2}")
-            
-            # Should not crash
-            is_same, details = self.comparator.compare_faces(img1, img2)
-            self.assertIsInstance(is_same, bool)
-            self.assertIsInstance(details, str)
-        else:
-            self.skipTest("Need at least 2 image files for integration test")
+        self.assertTrue(os.path.exists(img1), f"Required test image missing: {img1}")
+        self.assertTrue(os.path.exists(img2), f"Required test image missing: {img2}")
+        
+        print(f"\nTesting with {img1} vs {img2}")
+        
+        # Should not crash
+        is_same, details = self.comparator.compare_faces(img1, img2)
+        self.assertIsInstance(is_same, bool)
+        self.assertIsInstance(details, str)
     
     def test_known_same_vs_different(self):
         """Test with known same and different face pairs."""
