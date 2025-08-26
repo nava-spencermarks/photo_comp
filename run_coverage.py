@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-def run_local_coverage():
+def run_local_coverage() -> object:
     """Run comprehensive coverage locally."""
     project_root = Path(__file__).parent
 
@@ -46,7 +46,6 @@ def run_local_coverage():
             "test/test_face_compare.py",
         ],
     ]
-
     success = False
 
     for i, cmd in enumerate(commands):

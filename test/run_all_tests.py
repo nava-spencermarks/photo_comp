@@ -15,7 +15,7 @@ def run_all_tests():
     print("=" * 60)
     
     test_modules = [
-        ('test_robust_face_compare', 'Robust Face Comparison Tests'),
+        ('test_face_compare', 'Face Comparison Tests'),
         ('test_main', 'Main Script Tests'),
     ]
     

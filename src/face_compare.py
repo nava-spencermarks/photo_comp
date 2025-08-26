@@ -45,19 +45,16 @@ class FaceComparator:
         else:
             variations.append(("Original", original_image))
 
-        # Enhanced contrast
-        try:
+            # Enhanced contrast
+
             enhanced = ImageEnhance.Contrast(pil_image).enhance(1.3)
             if max(enhanced.size) > 1200:
                 ratio = 1200 / max(enhanced.size)
                 new_size = (int(enhanced.width * ratio), int(enhanced.height * ratio))
                 enhanced = enhanced.resize(new_size, Image.Resampling.LANCZOS)
             variations.append(("Enhanced contrast", np.array(enhanced)))
-        except:
-            pass
 
-        # Brightened
-        try:
+            # Brightened
             brightened = ImageEnhance.Brightness(pil_image).enhance(1.2)
             if max(brightened.size) > 1200:
                 ratio = 1200 / max(brightened.size)
@@ -67,17 +64,13 @@ class FaceComparator:
                 )
                 brightened = brightened.resize(new_size, Image.Resampling.LANCZOS)
             variations.append(("Brightened", np.array(brightened)))
-        except:
-            pass
 
-        # Smaller version (sometimes helps)
-        try:
+            # Smaller version (sometimes helps)
+
             smaller = pil_image.resize(
                 (pil_image.width // 2, pil_image.height // 2), Image.Resampling.LANCZOS
             )
             variations.append(("Smaller", np.array(smaller)))
-        except:
-            pass
 
         return variations
 
@@ -121,72 +114,63 @@ class FaceComparator:
             print(f"  Trying {var_name}...")
 
             # Strategy 1: face_recognition HOG
-            try:
-                face_locations = face_recognition.face_locations(
-                    image_np, model="hog", number_of_times_to_upsample=1
-                )
-                if face_locations:
-                    encodings = face_recognition.face_encodings(
-                        image_np, face_locations
-                    )
-                    if encodings:
-                        print(f"    ✓ HOG found {len(encodings)} faces")
-                        return (
-                            encodings,
-                            f"Found {len(encodings)} faces using HOG on {var_name}",
-                        )
-            except Exception as e:
-                print(f"    HOG failed: {e}")
 
-            # Strategy 2: face_recognition HOG with more upsampling
-            try:
-                face_locations = face_recognition.face_locations(
-                    image_np, model="hog", number_of_times_to_upsample=2
-                )
-                if face_locations:
-                    encodings = face_recognition.face_encodings(
-                        image_np, face_locations
-                    )
-                    if encodings:
-                        print(f"    ✓ HOG 2x found {len(encodings)} faces")
-                        return (
-                            encodings,
-                            f"Found {len(encodings)} faces using HOG 2x on {var_name}",
-                        )
-            except Exception as e:
-                print(f"    HOG 2x failed: {e}")
+            face_locations = face_recognition.face_locations(
+                image_np, model="hog", number_of_times_to_upsample=1
+            )
 
-            # Strategy 3: face_recognition CNN (slower but more accurate)
-            try:
-                face_locations = face_recognition.face_locations(image_np, model="cnn")
-                if face_locations:
-                    encodings = face_recognition.face_encodings(
-                        image_np, face_locations
+            if face_locations:
+                encodings = face_recognition.face_encodings(image_np, face_locations)
+                if encodings:
+                    print(f"    ✓ HOG found {len(encodings)} faces")
+                    return (
+                        encodings,
+                        f"Found {len(encodings)} faces using HOG on {var_name}",
                     )
-                    if encodings:
-                        print(f"    ✓ CNN found {len(encodings)} faces")
-                        return (
-                            encodings,
-                            f"Found {len(encodings)} faces using CNN on {var_name}",
-                        )
-            except Exception as e:
-                print(f"    CNN failed: {e}")
 
-            # Strategy 4: OpenCV fallback (conservative)
-            opencv_faces = self.detect_with_opencv_fallback(image_np)
-            if opencv_faces:
-                try:
-                    encodings = face_recognition.face_encodings(image_np, opencv_faces)
-                    if encodings:
-                        print(f"    ✓ OpenCV fallback found {len(encodings)} faces")
-                        return (
-                            encodings,
-                            f"Found {len(encodings)} faces using OpenCV fallback on {var_name}",
-                        )
-                except Exception as e:
-                    print(f"    OpenCV encoding failed: {e}")
+        # Strategy 2: face_recognition HOG with more upsampling
+        try:
+            face_locations = face_recognition.face_locations(
+                image_np, model="hog", number_of_times_to_upsample=2
+            )
+            if face_locations:
+                encodings = face_recognition.face_encodings(image_np, face_locations)
+                if encodings:
+                    print(f"    ✓ HOG 2x found {len(encodings)} faces")
+                    return (
+                        encodings,
+                        f"Found {len(encodings)} faces using HOG 2x on {var_name}",
+                    )
+        except Exception as e:
+            print(f"    HOG 2x failed: {e}")
+
+        # Strategy 3: face_recognition CNN (slower but more accurate)
+
+            face_locations = face_recognition.face_locations(image_np, model="cnn")
+            if face_locations:
+                encodings = face_recognition.face_encodings(image_np, face_locations)
+                if encodings:
+                    print(f"    ✓ CNN found {len(encodings)} faces")
+                    return (
+                        encodings,
+                        f"Found {len(encodings)} faces using CNN on {var_name}",
+                    )
+
+
+        # Strategy 4: OpenCV fallback (conservative)
+        opencv_faces = self.detect_with_opencv_fallback(image_np)
+        if opencv_faces:
+
+                encodings = face_recognition.face_encodings(image_np, opencv_faces)
+                if encodings:
+                    print(f"    ✓ OpenCV fallback found {len(encodings)} faces")
+                    return (
+                        encodings,
+                        f"Found {len(encodings)} faces using OpenCV fallback on {var_name}",
+                    )
 
         return None, "No faces detected with any method or image variation"
+
 
     def compare_faces(self, image1_path, image2_path):
         """Compare faces between two images with robust detection."""
