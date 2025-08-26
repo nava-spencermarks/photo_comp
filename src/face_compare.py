@@ -144,7 +144,7 @@ class FaceComparator:
         except Exception as e:
             print(f"    HOG 2x failed: {e}")
 
-        # Strategy 3: face_recognition CNN (slower but more accurate)
+            # Strategy 3: face_recognition CNN (slower but more accurate)
 
             face_locations = face_recognition.face_locations(image_np, model="cnn")
             if face_locations:
@@ -156,21 +156,19 @@ class FaceComparator:
                         f"Found {len(encodings)} faces using CNN on {var_name}",
                     )
 
-
         # Strategy 4: OpenCV fallback (conservative)
         opencv_faces = self.detect_with_opencv_fallback(image_np)
         if opencv_faces:
 
-                encodings = face_recognition.face_encodings(image_np, opencv_faces)
-                if encodings:
-                    print(f"    ✓ OpenCV fallback found {len(encodings)} faces")
-                    return (
-                        encodings,
-                        f"Found {len(encodings)} faces using OpenCV fallback on {var_name}",
-                    )
+            encodings = face_recognition.face_encodings(image_np, opencv_faces)
+            if encodings:
+                print(f"    ✓ OpenCV fallback found {len(encodings)} faces")
+                return (
+                    encodings,
+                    f"Found {len(encodings)} faces using OpenCV fallback on {var_name}",
+                )
 
         return None, "No faces detected with any method or image variation"
-
 
     def compare_faces(self, image1_path, image2_path):
         """Compare faces between two images with robust detection."""
