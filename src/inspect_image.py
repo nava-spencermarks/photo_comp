@@ -58,7 +58,7 @@ def inspect_image(image_path):
             print("⚠️  Image has very low contrast")
 
         # Try different OpenCV detection settings to see if we can find ANYTHING
-        print(f"\n🔍 OpenCV Detection Tests:")
+        print("\n🔍 OpenCV Detection Tests:")
         face_cascade = cv2.CascadeClassifier(
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
@@ -84,7 +84,7 @@ def inspect_image(image_path):
                     print(f"    Face {i+1}: {w}x{h} at ({x},{y})")
 
         # Try face_recognition with very small image
-        print(f"\n🔍 Face_recognition Tests:")
+        print("\n🔍 Face_recognition Tests:")
 
         # Test with smaller version
         small_image = pil_image.resize((400, 300), Image.Resampling.LANCZOS)

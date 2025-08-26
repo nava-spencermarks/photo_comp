@@ -8,6 +8,8 @@ import sys
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(__file__))
+
+# Import after path modification  # noqa: E402
 from face_compare import FaceComparator
 
 
