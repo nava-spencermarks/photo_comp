@@ -12,7 +12,7 @@ warnings.filterwarnings(
 import face_recognition
 import cv2
 import numpy as np
-from PIL import Image, ImageEnhance, ImageOps
+from PIL import Image, ImageEnhance
 import os
 
 
@@ -23,7 +23,8 @@ class FaceComparator:
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
 
-    def preprocess_image_variations(self, image_path):
+    @staticmethod
+    def preprocess_image_variations(image_path):
         """Create multiple variations of an image for better detection."""
         original_image = face_recognition.load_image_file(image_path)
         pil_image = Image.fromarray(original_image)

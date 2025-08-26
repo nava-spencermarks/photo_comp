@@ -3,12 +3,12 @@
 Coverage tracking and baseline management for the face comparison project.
 """
 
+import argparse
 import json
 import re
 import subprocess
 import sys
 from pathlib import Path
-import argparse
 
 
 class CoverageTracker:

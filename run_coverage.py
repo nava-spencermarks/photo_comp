@@ -3,9 +3,9 @@
 Local script to run tests with coverage reporting.
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 

@@ -3,13 +3,14 @@
 Tests for the robust face comparison system.
 """
 
-import unittest
 import os
+import shutil
 import sys
 import tempfile
-import shutil
-from PIL import Image, ImageDraw
+import unittest
+
 import numpy as np
+from PIL import Image, ImageDraw
 
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -80,7 +81,7 @@ class TestFaceComparator(unittest.TestCase):
     def test_different_images(self):
         """Test comparison of different face images."""
         # Use existing test images - they MUST exist
-        test_dir = os.path.join(os.path.dirname(__file__), 'test_data')
+        test_dir: str = os.path.join(os.path.dirname(__file__), 'test_data')
         image1_path = os.path.join(test_dir, 'face_me_1.png')
         image2_path = os.path.join(test_dir, 'me_different.png')
         

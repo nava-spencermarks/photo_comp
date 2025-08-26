@@ -3,12 +3,14 @@
 Tests for main.py entry point.
 """
 
-import unittest
+import os
 import subprocess
 import sys
-import os
 import tempfile
+import unittest
+
 from PIL import Image
+
 
 class TestMainScript(unittest.TestCase):
     """Test the main script entry point."""
@@ -23,7 +25,8 @@ class TestMainScript(unittest.TestCase):
         img.save(path)
         return path
     
-    def run_main_script(self, args):
+    @staticmethod
+    def run_main_script(args):
         """Run the main script with given arguments."""
         script_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'main.py')
         cmd = [sys.executable, script_path] + args

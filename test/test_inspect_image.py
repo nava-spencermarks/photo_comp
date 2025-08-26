@@ -3,14 +3,15 @@
 Tests for the image inspection utility.
 """
 
-import unittest
 import os
+import shutil
 import sys
 import tempfile
-import shutil
-from PIL import Image
+import unittest
+from unittest.mock import patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+from PIL import Image
 
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))

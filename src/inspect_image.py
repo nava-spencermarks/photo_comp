@@ -3,11 +3,12 @@
 Tool to inspect what's actually in the images and why face detection might be failing.
 """
 
+import os
+
 import cv2
 import face_recognition
 import numpy as np
 from PIL import Image
-import os
 
 
 def inspect_image(image_path):
@@ -78,7 +79,7 @@ def inspect_image(image_path):
                 flags=cv2.CASCADE_SCALE_IMAGE,
             )
             print(f"  {name}: {len(faces)} potential faces")
-            if len(faces) > 0 and len(faces) < 20:  # Show details if reasonable number
+            if 0 < len(faces) < 20:  # Show details if reasonable number
                 for i, (x, y, w, h) in enumerate(faces[:5]):  # Max 5
                     print(f"    Face {i+1}: {w}x{h} at ({x},{y})")
 

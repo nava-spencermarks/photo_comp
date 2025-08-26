@@ -3,8 +3,8 @@
 Face Comparison Application
 """
 
-import sys
 import os
+import sys
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(__file__))
