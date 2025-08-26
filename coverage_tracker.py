@@ -4,7 +4,6 @@ Coverage tracking and baseline management for the face comparison project.
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
@@ -41,8 +40,9 @@ class CoverageTracker:
 
             return coverage_percent, result.stdout
         except Exception as e:
-            print(f"Error running coverage: {e}")
-            return 0.0, ""
+            error_message: str = f"Error running coverage: {e}"
+            print(error_message)
+            return 0.0, error_message
 
     def get_baseline(self):
         """Get baseline coverage from file."""
