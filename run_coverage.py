@@ -13,7 +13,16 @@ def run_local_coverage() -> object:
     """Run comprehensive coverage locally."""
     project_root = Path(__file__).parent
 
-    print("🧪 Running tests with coverage...")
+    # First run linting
+    print("🧹 Running linting checks...")
+    print("=" * 60)
+    
+    lint_result = subprocess.run([sys.executable, "lint.py"], cwd=project_root)
+    if lint_result.returncode != 0:
+        print("❌ Linting failed! Please fix linting issues before running tests.")
+        return False
+    
+    print("\n🧪 Running tests with coverage...")
     print("=" * 60)
 
     # Test commands to try - only run WORKING tests

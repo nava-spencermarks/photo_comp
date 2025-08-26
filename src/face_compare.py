@@ -3,17 +3,17 @@
 Robust face comparison with multiple fallback detection strategies.
 """
 
+import os
 import warnings
+
+import cv2
+import face_recognition
+import numpy as np
+from PIL import Image, ImageEnhance
 
 warnings.filterwarnings(
     "ignore", category=UserWarning, module="face_recognition_models"
 )
-
-import face_recognition
-import cv2
-import numpy as np
-from PIL import Image, ImageEnhance
-import os
 
 
 class FaceComparator:
@@ -100,7 +100,7 @@ class FaceComparator:
                     )  # Convert to face_recognition format
 
             return good_faces
-        except:
+        except Exception:
             return []
 
     def get_face_encodings(self, image_path):
@@ -225,18 +225,18 @@ class FaceComparator:
         print(f"Confidence: {confidence:.1f}%")
 
         if is_match:
-            print(f"✅ SAME PERSON")
+            print("✅ SAME PERSON")
             print(f"   {len(matches)} matching face pair(s) found:")
             for face1, face2, dist in matches[:3]:
                 print(f"   • Face {face1} ↔ Face {face2} (distance: {dist:.3f})")
             if len(matches) > 3:
                 print(f"   ... and {len(matches) - 3} more")
         else:
-            print(f"❌ DIFFERENT PEOPLE")
+            print("❌ DIFFERENT PEOPLE")
             if best_distance != float("inf"):
                 print(f"   Closest similarity: {best_distance:.3f} (above threshold)")
             else:
-                print(f"   No measurable similarity found")
+                print("   No measurable similarity found")
 
         print("=" * 60)
         return is_match, f"Distance: {best_distance:.3f}, Confidence: {confidence:.1f}%"

@@ -23,17 +23,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
     
-    - name: Lint with flake8
+    - name: Run comprehensive linting
       run: |
-        # Stop on syntax errors or undefined names
-        flake8 src test --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Check for other issues (non-blocking)
-        flake8 src test --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
-    - name: Check code formatting
-      run: |
-        black --check src test *.py
-        isort --check-only src test *.py
+        python lint.py
 
   test:
     name: Test Suite
