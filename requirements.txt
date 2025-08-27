@@ -5,3 +5,6 @@ git+https://github.com/ageitgey/face_recognition_models
 numpy
 pillow
 setuptools
+
+# Web Framework
+flask>=2.3.0

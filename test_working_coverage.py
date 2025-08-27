@@ -27,6 +27,7 @@ def run_working_coverage():
         "test/test_inspect_image.py",
         "test/test_main.py",
         "test/test_face_compare.py",
+        "test/test_webapp.py",
     ]
 
     try:

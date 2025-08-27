@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" action="{{ url_for('compare_faces') }}" enctype="multipart/form-data">
+        <div class="image-container">
+            <div class="image-box">
+                <h3>First Image</h3>
+                <div class="upload-area">
+                    <div class="form-group">
+                        <label for="image1">Choose first image:</label>
+                        <input type="file" id="image1" name="image1" class="file-input" 
+                               accept="image/*" required>
+                    </div>
+                    <p style="color: #666; font-size: 0.9rem;">
+                        Supported formats: PNG, JPG, JPEG, GIF, BMP
+                    </p>
+                </div>
+            </div>
+            
+            <div class="image-box">
+                <h3>Second Image</h3>
+                <div class="upload-area">
+                    <div class="form-group">
+                        <label for="image2">Choose second image:</label>
+                        <input type="file" id="image2" name="image2" class="file-input" 
+                               accept="image/*" required>
+                    </div>
+                    <p style="color: #666; font-size: 0.9rem;">
+                        Supported formats: PNG, JPG, JPEG, GIF, BMP
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn">
+                🔍 Compare Faces
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1rem; color: #555;">How it works:</h3>
+    <ol style="color: #666; line-height: 1.6;">
+        <li>Upload two images containing faces</li>
+        <li>Our AI analyzes the facial features in both images</li>
+        <li>Get instant results showing if it's the same person</li>
+        <li>View detailed comparison metrics</li>
+    </ol>
+</div>
+
+<script>
+// Add preview functionality
+document.getElementById('image1').addEventListener('change', function(e) {
+    previewImage(e.target, 'preview1');
+});
+
+document.getElementById('image2').addEventListener('change', function(e) {
+    previewImage(e.target, 'preview2');
+});
+
+function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let preview = document.getElementById(previewId);
+            if (!preview) {
+                preview = document.createElement('img');
+                preview.id = previewId;
+                preview.style.cssText = 'max-width: 200px; max-height: 200px; margin-top: 1rem; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);';
+                input.parentNode.appendChild(preview);
+            }
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2 style="text-align: center; margin-bottom: 2rem; color: #555;">
+        Comparison Results
+    </h2>
+    
+    <div class="image-container">
+        <div class="image-box">
+            <h3>First Image</h3>
+            <img src="{{ url_for('uploaded_file', filename=image1) }}" 
+                 alt="First uploaded image">
+            <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                {{ image1 }}
+            </p>
+        </div>
+        
+        <div class="image-box">
+            <h3>Second Image</h3>
+            <img src="{{ url_for('uploaded_file', filename=image2) }}" 
+                 alt="Second uploaded image">
+            <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                {{ image2 }}
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin: 2rem 0;">
+        {% if is_same_person %}
+            <div class="result-badge same-person">
+                ✅ SAME PERSON
+            </div>
+            <p style="font-size: 1.1rem; color: #4CAF50; font-weight: 600;">
+                The faces in both images appear to be the same person
+            </p>
+        {% else %}
+            <div class="result-badge different-person">
+                ❌ DIFFERENT PEOPLE
+            </div>
+            <p style="font-size: 1.1rem; color: #f44336; font-weight: 600;">
+                The faces in the images appear to be different people
+            </p>
+        {% endif %}
+    </div>
+    
+    <div class="details">
+        <h4 style="margin-bottom: 0.5rem; color: #555;">Technical Details:</h4>
+        <p style="font-family: monospace; color: #666;">{{ details }}</p>
+        <p style="margin-top: 0.5rem; color: #666;">
+            <strong>Confidence Level:</strong> {{ confidence }}
+        </p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="{{ url_for('index') }}" class="btn" style="display: inline-block; text-decoration: none; margin-top: 1rem;">
+            🔄 Compare More Images
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1rem; color: #555;">Understanding the Results:</h3>
+    <div style="color: #666; line-height: 1.6;">
+        <p><strong>Distance:</strong> Lower values indicate higher similarity (same person)</p>
+        <p><strong>Threshold:</strong> Values below the threshold suggest same person</p>
+        <p><strong>Confidence:</strong> Based on face detection quality and comparison metrics</p>
+        
+        {% if is_same_person %}
+        <div style="background: #e8f5e8; border-left: 4px solid #4CAF50; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+            <p><strong>✅ Match Found:</strong> The facial features, structure, and measurements between the two images show high similarity, indicating they likely contain the same person.</p>
+        </div>
+        {% else %}
+        <div style="background: #ffeaea; border-left: 4px solid #f44336; padding: 1rem; margin-top: 1rem; border-radius: 4px;">
+            <p><strong>❌ No Match:</strong> The facial features show significant differences, or faces could not be properly detected in one or both images.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
