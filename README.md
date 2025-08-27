@@ -1,6 +1,6 @@
 # Face Comparison Tool 👥
 
-A robust Python application that compares faces in two images to determine if they show the same person.
+A   Python application that compares faces in two images to determine if they show the same person.
 
 ## ✨ Features
 
