@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 # Import after path modification  # noqa: E402
 from src.face_compare import FaceComparator
+from src.image_masking import ImageMasker
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
@@ -76,9 +77,50 @@ def compare_faces():
         file1.save(filepath1)
         file2.save(filepath2)
         
+        # Get rectangle data from form
+        rectangles1_json = request.form.get('rectangles1', '')
+        rectangles2_json = request.form.get('rectangles2', '')
+        
+        # Initialize masker and parse rectangle data
+        masker = ImageMasker()
+        rectangles1 = masker.parse_rectangle_data(rectangles1_json)
+        rectangles2 = masker.parse_rectangle_data(rectangles2_json)
+        
+        # Determine comparison images (original or masked)
+        comparison_filepath1 = filepath1
+        comparison_filepath2 = filepath2
+        mask_applied = False
+        
+        # Apply masks if rectangles are present
+        if rectangles1 or rectangles2:
+            # Create masked versions
+            masked_filename1 = f"masked_{filename1}"
+            masked_filename2 = f"masked_{filename2}"
+            
+            masked_filepath1 = os.path.join(app.config['UPLOAD_FOLDER'], masked_filename1)
+            masked_filepath2 = os.path.join(app.config['UPLOAD_FOLDER'], masked_filename2)
+            
+            # Apply masks (use same rectangles for both images for synchronized masking)
+            # Use rectangles1 as primary, fall back to rectangles2
+            primary_rectangles = rectangles1 if rectangles1 else rectangles2
+            
+            masker.create_masked_image_file(filepath1, masked_filepath1, primary_rectangles)
+            masker.create_masked_image_file(filepath2, masked_filepath2, primary_rectangles)
+            
+            comparison_filepath1 = masked_filepath1
+            comparison_filepath2 = masked_filepath2
+            mask_applied = True
+        
         # Perform face comparison
         comparator = FaceComparator()
-        is_same_person, details = comparator.compare_faces(filepath1, filepath2)
+        is_same_person, details = comparator.compare_faces(comparison_filepath1, comparison_filepath2)
+        
+        # Get mask statistics if masks were applied
+        mask_stats = None
+        if mask_applied:
+            primary_rectangles = rectangles1 if rectangles1 else rectangles2
+            mask = masker.create_mask_from_rectangles(filepath1, primary_rectangles)
+            mask_stats = masker.get_mask_statistics(mask)
         
         # Prepare result data
         result_data = {
@@ -86,7 +128,10 @@ def compare_faces():
             'image2': filename2,
             'is_same_person': is_same_person,
             'details': details,
-            'confidence': 'High' if 'Distance: 0.' in details else 'Medium'
+            'confidence': 'High' if 'Distance: 0.' in details else 'Medium',
+            'mask_applied': mask_applied,
+            'mask_stats': mask_stats,
+            'rectangles_count': len(rectangles1) if rectangles1 else len(rectangles2) if rectangles2 else 0
         }
         
         return render_template('result.html', **result_data)

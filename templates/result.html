@@ -44,12 +44,37 @@
         {% endif %}
     </div>
     
+    {% if mask_applied %}
+    <div style="background: #f0f8ff; border-left: 4px solid #667eea; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
+        <h4 style="margin-bottom: 0.5rem; color: #555;">🎯 Masked Comparison Applied</h4>
+        <p style="color: #666; margin-bottom: 0.5rem;">
+            Rectangle masks were applied to focus comparison on specific regions.
+        </p>
+        {% if mask_stats %}
+        <div style="font-family: monospace; font-size: 0.9rem; color: #666;">
+            <p>• Rectangles used: {{ rectangles_count }}</p>
+            <p>• Masked area: {{ "%.1f"|format(mask_stats.mask_percentage) }}% of image</p>
+            <p>• Compared area: {{ "%.1f"|format(mask_stats.unmasked_percentage) }}% of image</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
     <div class="details">
         <h4 style="margin-bottom: 0.5rem; color: #555;">Technical Details:</h4>
         <p style="font-family: monospace; color: #666;">{{ details }}</p>
         <p style="margin-top: 0.5rem; color: #666;">
             <strong>Confidence Level:</strong> {{ confidence }}
         </p>
+        {% if mask_applied %}
+        <p style="margin-top: 0.5rem; color: #666;">
+            <strong>Comparison Method:</strong> Masked regions ({{ rectangles_count }} rectangle{% if rectangles_count != 1 %}s{% endif %})
+        </p>
+        {% else %}
+        <p style="margin-top: 0.5rem; color: #666;">
+            <strong>Comparison Method:</strong> Full image analysis
+        </p>
+        {% endif %}
     </div>
     
     <div style="text-align: center;">

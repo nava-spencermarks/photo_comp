@@ -186,6 +186,40 @@
             color: #764ba2;
         }
         
+        .canvas-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .btn-small {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-small:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .image-canvas-container {
+            margin-top: 1rem;
+        }
+        
+        canvas {
+            border-radius: 6px;
+            background: transparent;
+            pointer-events: auto;
+        }
+        
         @media (max-width: 768px) {
             .image-container {
                 flex-direction: column;

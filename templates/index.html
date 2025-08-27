@@ -16,6 +16,23 @@
                         Supported formats: PNG, JPG, JPEG, GIF, BMP
                     </p>
                 </div>
+                <div class="image-canvas-container" id="canvas-container-1" style="display: none;">
+                    <div style="position: relative;">
+                        <img id="preview1" style="max-width: 300px; max-height: 300px; border-radius: 6px;">
+                        <canvas id="canvas1" style="position: absolute; top: 0; left: 0; cursor: crosshair;"></canvas>
+                    </div>
+                    <div class="canvas-controls">
+                        <button type="button" class="btn-small" onclick="clearRectangles('canvas1')" style="background: #f44336;">🗑️ Clear All</button>
+                        <button type="button" class="btn-small" id="draw-mode-btn-1" onclick="toggleDrawMode('canvas1')">✏️ Draw Mode</button>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                            <div id="mode-indicator-1">Click and drag to draw rectangles</div>
+                            <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
+                                Move mode: Drag rectangles, grab corners/edges to resize<br>
+                                Shortcuts: D=toggle mode, Del=remove last, Esc=cancel
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="image-box">
@@ -29,6 +46,23 @@
                     <p style="color: #666; font-size: 0.9rem;">
                         Supported formats: PNG, JPG, JPEG, GIF, BMP
                     </p>
+                </div>
+                <div class="image-canvas-container" id="canvas-container-2" style="display: none;">
+                    <div style="position: relative;">
+                        <img id="preview2" style="max-width: 300px; max-height: 300px; border-radius: 6px;">
+                        <canvas id="canvas2" style="position: absolute; top: 0; left: 0; cursor: crosshair;"></canvas>
+                    </div>
+                    <div class="canvas-controls">
+                        <button type="button" class="btn-small" onclick="clearRectangles('canvas2')" style="background: #f44336;">🗑️ Clear All</button>
+                        <button type="button" class="btn-small" id="draw-mode-btn-2" onclick="toggleDrawMode('canvas2')">✏️ Draw Mode</button>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                            <div id="mode-indicator-2">Click and drag to draw rectangles</div>
+                            <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
+                                Move mode: Drag rectangles, grab corners/edges to resize<br>
+                                Shortcuts: D=toggle mode, Del=remove last, Esc=cancel
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,30 +86,576 @@
 </div>
 
 <script>
+// Rectangle drawing functionality
+class RectangleDrawer {
+    constructor(canvasId, imageId) {
+        this.canvas = document.getElementById(canvasId);
+        this.image = document.getElementById(imageId);
+        this.ctx = this.canvas.getContext('2d');
+        this.rectangles = [];
+        this.isDrawing = false;
+        this.drawMode = true;
+        this.startX = 0;
+        this.startY = 0;
+        this.selectedRect = null;
+        this.isDragging = false;
+        this.isResizing = false;
+        this.resizeHandle = null;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.hoveredRect = null;
+        this.resizeHandleSize = 8;
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        
+        // Add keyboard shortcuts
+        this.canvas.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.canvas.tabIndex = 0; // Make canvas focusable for keyboard events
+    }
+    
+    handleKeyDown(e) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            // Delete hovered rectangle or last rectangle
+            if (this.rectangles.length > 0) {
+                this.rectangles.pop(); // Remove last rectangle
+                this.redraw();
+                this.syncRectangles();
+                e.preventDefault();
+            }
+        } else if (e.key === 'Escape') {
+            // Cancel current drawing or deselect
+            this.isDrawing = false;
+            this.isDragging = false;
+            this.selectedRect = null;
+            this.redraw();
+            e.preventDefault();
+        } else if (e.key === 'd' || e.key === 'D') {
+            // Toggle draw mode
+            this.toggleDrawMode();
+            e.preventDefault();
+        }
+    }
+    
+    updateCanvasSize() {
+        const rect = this.image.getBoundingClientRect();
+        this.canvas.width = this.image.offsetWidth;
+        this.canvas.height = this.image.offsetHeight;
+        
+        // Ensure canvas is properly positioned and sized
+        this.canvas.style.width = this.image.offsetWidth + 'px';
+        this.canvas.style.height = this.image.offsetHeight + 'px';
+        this.canvas.style.position = 'absolute';
+        this.canvas.style.top = '0';
+        this.canvas.style.left = '0';
+        
+        this.redraw();
+    }
+    
+    getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+    
+    handleMouseDown(e) {
+        e.preventDefault();
+        const pos = this.getMousePos(e);
+        
+        if (!this.drawMode) {
+            // Find rectangle and check for resize handles
+            this.selectedRect = this.findRectangleAt(pos.x, pos.y, 5);
+            
+            if (this.selectedRect) {
+                this.resizeHandle = this.getResizeHandle(pos.x, pos.y, this.selectedRect);
+                
+                if (this.resizeHandle) {
+                    this.isResizing = true;
+                    this.canvas.style.cursor = this.getCursorForHandle(this.resizeHandle);
+                } else {
+                    this.isDragging = true;
+                    this.dragStartX = pos.x - this.selectedRect.x;
+                    this.dragStartY = pos.y - this.selectedRect.y;
+                    this.canvas.style.cursor = 'grabbing';
+                }
+            }
+        } else {
+            // Start drawing new rectangle with snap-to-grid
+            this.isDrawing = true;
+            this.startX = Math.round(pos.x / 5) * 5; // Snap to 5px grid
+            this.startY = Math.round(pos.y / 5) * 5;
+            this.canvas.style.cursor = 'crosshair';
+        }
+    }
+    
+    handleMouseMove(e) {
+        e.preventDefault();
+        const pos = this.getMousePos(e);
+        
+        // Update cursor and hover effects when not actively manipulating
+        if (!this.isDragging && !this.isResizing && !this.isDrawing) {
+            this.hoveredRect = this.findRectangleAt(pos.x, pos.y, 8);
+            
+            if (!this.drawMode && this.hoveredRect) {
+                const resizeHandle = this.getResizeHandle(pos.x, pos.y, this.hoveredRect);
+                this.canvas.style.cursor = resizeHandle ? this.getCursorForHandle(resizeHandle) : 'grab';
+            } else {
+                this.canvas.style.cursor = this.drawMode ? 'crosshair' : 'default';
+            }
+            
+            this.redraw(this.hoveredRect);
+        }
+        
+        // Handle resizing
+        if (this.isResizing && this.selectedRect) {
+            this.resizeRectangle(pos.x, pos.y);
+            this.redraw();
+            this.syncRectangles();
+        }
+        // Handle dragging  
+        else if (this.isDragging && this.selectedRect) {
+            const newX = Math.round((pos.x - this.dragStartX) / 5) * 5; // Snap to grid
+            const newY = Math.round((pos.y - this.dragStartY) / 5) * 5;
+            
+            const padding = 5;
+            this.selectedRect.x = Math.max(padding, Math.min(newX, this.canvas.width - this.selectedRect.width - padding));
+            this.selectedRect.y = Math.max(padding, Math.min(newY, this.canvas.height - this.selectedRect.height - padding));
+            
+            this.redraw();
+            this.syncRectangles();
+        }
+        // Handle drawing
+        else if (this.isDrawing) {
+            this.drawPreview(pos.x, pos.y);
+        }
+    }
+    
+    handleMouseUp(e) {
+        const pos = this.getMousePos(e);
+        
+        if (this.isDrawing) {
+            const snappedX = Math.round(pos.x / 5) * 5;
+            const snappedY = Math.round(pos.y / 5) * 5;
+            const width = snappedX - this.startX;
+            const height = snappedY - this.startY;
+            
+            // Minimum size check with smaller threshold for easier drawing
+            if (Math.abs(width) >= 15 && Math.abs(height) >= 15) {
+                this.rectangles.push({
+                    x: Math.min(this.startX, snappedX),
+                    y: Math.min(this.startY, snappedY),
+                    width: Math.abs(width),
+                    height: Math.abs(height)
+                });
+                this.redraw();
+                this.syncRectangles();
+            }
+            this.isDrawing = false;
+        }
+        
+        // Reset all interaction states
+        this.isDragging = false;
+        this.isResizing = false;
+        this.selectedRect = null;
+        this.resizeHandle = null;
+        this.canvas.style.cursor = this.drawMode ? 'crosshair' : 'default';
+    }
+    
+    resizeRectangle(mouseX, mouseY) {
+        if (!this.selectedRect || !this.resizeHandle) return;
+        
+        const rect = this.selectedRect;
+        const handle = this.resizeHandle;
+        const minSize = 20;
+        
+        // Snap to grid
+        mouseX = Math.round(mouseX / 5) * 5;
+        mouseY = Math.round(mouseY / 5) * 5;
+        
+        let newX = rect.x, newY = rect.y, newWidth = rect.width, newHeight = rect.height;
+        
+        switch (handle) {
+            case 'nw':
+                newWidth = rect.x + rect.width - mouseX;
+                newHeight = rect.y + rect.height - mouseY;
+                if (newWidth >= minSize) { newX = mouseX; }
+                if (newHeight >= minSize) { newY = mouseY; }
+                break;
+            case 'ne':
+                newWidth = mouseX - rect.x;
+                newHeight = rect.y + rect.height - mouseY;
+                if (newHeight >= minSize) { newY = mouseY; }
+                break;
+            case 'sw':
+                newWidth = rect.x + rect.width - mouseX;
+                newHeight = mouseY - rect.y;
+                if (newWidth >= minSize) { newX = mouseX; }
+                break;
+            case 'se':
+                newWidth = mouseX - rect.x;
+                newHeight = mouseY - rect.y;
+                break;
+            case 'n':
+                newHeight = rect.y + rect.height - mouseY;
+                if (newHeight >= minSize) { newY = mouseY; }
+                break;
+            case 's':
+                newHeight = mouseY - rect.y;
+                break;
+            case 'w':
+                newWidth = rect.x + rect.width - mouseX;
+                if (newWidth >= minSize) { newX = mouseX; }
+                break;
+            case 'e':
+                newWidth = mouseX - rect.x;
+                break;
+        }
+        
+        // Apply constraints
+        if (newWidth >= minSize) rect.width = newWidth;
+        if (newHeight >= minSize) rect.height = newHeight;
+        if (newX !== rect.x && rect.width >= minSize) rect.x = newX;
+        if (newY !== rect.y && rect.height >= minSize) rect.y = newY;
+        
+        // Keep within canvas bounds
+        rect.x = Math.max(0, Math.min(rect.x, this.canvas.width - rect.width));
+        rect.y = Math.max(0, Math.min(rect.y, this.canvas.height - rect.height));
+    }
+    
+    drawPreview(mouseX, mouseY) {
+        this.redraw();
+        
+        const snappedX = Math.round(mouseX / 5) * 5;
+        const snappedY = Math.round(mouseY / 5) * 5;
+        const width = snappedX - this.startX;
+        const height = snappedY - this.startY;
+        
+        // Enhanced preview rectangle
+        this.ctx.globalAlpha = 0.8;
+        this.ctx.strokeStyle = 'rgb(102, 102, 102)';
+        this.ctx.fillStyle = 'rgb(153, 153, 153)';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([8, 4]);
+        
+        this.ctx.fillRect(this.startX, this.startY, width, height);
+        this.ctx.strokeRect(this.startX, this.startY, width, height);
+        
+        // Size indicator
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.strokeStyle = '#333333';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.lineWidth = 3;
+        
+        const sizeText = `${Math.abs(width)}×${Math.abs(height)}`;
+        const textX = this.startX + width/2;
+        const textY = this.startY + height/2;
+        
+        this.ctx.strokeText(sizeText, textX, textY);
+        this.ctx.fillText(sizeText, textX, textY);
+        
+        this.ctx.setLineDash([]);
+        
+        // Sync preview to other canvas
+        this.syncDrawingPreview(width, height);
+    }
+    
+    findRectangleAt(x, y, buffer = 0) {
+        // Search in reverse order to find the topmost rectangle first
+        for (let i = this.rectangles.length - 1; i >= 0; i--) {
+            const rect = this.rectangles[i];
+            if (x >= rect.x - buffer && x <= rect.x + rect.width + buffer && 
+                y >= rect.y - buffer && y <= rect.y + rect.height + buffer) {
+                return rect;
+            }
+        }
+        return null;
+    }
+    
+    getResizeHandle(x, y, rect) {
+        if (!rect) return null;
+        
+        const size = this.resizeHandleSize;
+        const handles = {
+            'nw': {x: rect.x, y: rect.y},
+            'ne': {x: rect.x + rect.width, y: rect.y},
+            'sw': {x: rect.x, y: rect.y + rect.height},
+            'se': {x: rect.x + rect.width, y: rect.y + rect.height},
+            'n': {x: rect.x + rect.width/2, y: rect.y},
+            's': {x: rect.x + rect.width/2, y: rect.y + rect.height},
+            'w': {x: rect.x, y: rect.y + rect.height/2},
+            'e': {x: rect.x + rect.width, y: rect.y + rect.height/2}
+        };
+        
+        for (let [handle, pos] of Object.entries(handles)) {
+            if (Math.abs(x - pos.x) <= size && Math.abs(y - pos.y) <= size) {
+                return handle;
+            }
+        }
+        return null;
+    }
+    
+    getCursorForHandle(handle) {
+        const cursors = {
+            'nw': 'nw-resize', 'ne': 'ne-resize', 'sw': 'sw-resize', 'se': 'se-resize',
+            'n': 'n-resize', 's': 's-resize', 'w': 'w-resize', 'e': 'ew-resize'
+        };
+        return cursors[handle] || 'default';
+    }
+    
+    redraw(hoveredRect = null) {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.rectangles.forEach((rect, index) => {
+            const isHovered = hoveredRect === rect;
+            const isSelected = this.selectedRect === rect;
+            
+            // Draw rectangle with enhanced visual feedback
+            this.ctx.globalAlpha = 1.0;
+            this.ctx.fillStyle = isHovered ? '#BBBBBB' : '#999999';
+            this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            
+            // Draw border with selection feedback
+            this.ctx.strokeStyle = isSelected ? '#444444' : (isHovered ? '#444444' : '#666666');
+            this.ctx.lineWidth = isSelected ? 3 : (isHovered ? 2 : 1);
+            this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            
+            // Draw rectangle number
+            this.ctx.font = 'bold 16px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            
+            const centerX = rect.x + rect.width / 2;
+            const centerY = rect.y + rect.height / 2;
+            const text = (index + 1).toString();
+            
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeText(text, centerX, centerY);
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillText(text, centerX, centerY);
+            
+            // Draw resize handles for selected rectangle in move mode
+            if (isSelected && !this.drawMode) {
+                this.drawResizeHandles(rect);
+            }
+        });
+    }
+    
+    drawResizeHandles(rect) {
+        const size = this.resizeHandleSize;
+        const handles = [
+            {x: rect.x, y: rect.y}, // nw
+            {x: rect.x + rect.width, y: rect.y}, // ne
+            {x: rect.x, y: rect.y + rect.height}, // sw
+            {x: rect.x + rect.width, y: rect.y + rect.height}, // se
+            {x: rect.x + rect.width/2, y: rect.y}, // n
+            {x: rect.x + rect.width/2, y: rect.y + rect.height}, // s
+            {x: rect.x, y: rect.y + rect.height/2}, // w
+            {x: rect.x + rect.width, y: rect.y + rect.height/2} // e
+        ];
+        
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.strokeStyle = '#444444';
+        this.ctx.lineWidth = 2;
+        
+        handles.forEach(handle => {
+            this.ctx.fillRect(handle.x - size/2, handle.y - size/2, size, size);
+            this.ctx.strokeRect(handle.x - size/2, handle.y - size/2, size, size);
+        });
+    }
+    
+    clearRectangles() {
+        this.rectangles = [];
+        this.redraw();
+        this.syncRectangles();
+    }
+    
+    toggleDrawMode() {
+        this.drawMode = !this.drawMode;
+        this.canvas.style.cursor = this.drawMode ? 'crosshair' : 'move';
+    }
+    
+    syncRectangles() {
+        // Get the other drawer using the global variables
+        const otherDrawer = this.canvas.id === 'canvas1' ? canvas2_drawer : canvas1_drawer;
+        
+        if (otherDrawer && otherDrawer.canvas.width > 0 && otherDrawer.canvas.height > 0) {
+            // Calculate scale factors between canvases
+            const scaleX = otherDrawer.canvas.width / this.canvas.width;
+            const scaleY = otherDrawer.canvas.height / this.canvas.height;
+            
+            // Copy and scale rectangles to other canvas
+            otherDrawer.rectangles = this.rectangles.map(rect => ({
+                x: rect.x * scaleX,
+                y: rect.y * scaleY,
+                width: rect.width * scaleX,
+                height: rect.height * scaleY
+            }));
+            
+            otherDrawer.redraw();
+        }
+    }
+    
+    syncDrawingPreview(width, height) {
+        const otherDrawer = this.canvas.id === 'canvas1' ? canvas2_drawer : canvas1_drawer;
+        
+        if (otherDrawer && otherDrawer.canvas.width > 0 && otherDrawer.canvas.height > 0) {
+            const scaleX = otherDrawer.canvas.width / this.canvas.width;
+            const scaleY = otherDrawer.canvas.height / this.canvas.height;
+            
+            otherDrawer.redraw();
+            
+            const scaledStartX = this.startX * scaleX;
+            const scaledStartY = this.startY * scaleY;
+            const scaledWidth = width * scaleX;
+            const scaledHeight = height * scaleY;
+            
+            const otherCtx = otherDrawer.ctx;
+            
+            // Match the enhanced preview style
+            otherCtx.globalAlpha = 0.8;
+            otherCtx.strokeStyle = 'rgb(102, 102, 102)';
+            otherCtx.fillStyle = 'rgb(153, 153, 153)';
+            otherCtx.lineWidth = 2;
+            otherCtx.setLineDash([8, 4]);
+            
+            otherCtx.fillRect(scaledStartX, scaledStartY, scaledWidth, scaledHeight);
+            otherCtx.strokeRect(scaledStartX, scaledStartY, scaledWidth, scaledHeight);
+            
+            // Size indicator with enhanced styling
+            otherCtx.globalAlpha = 1.0;
+            otherCtx.fillStyle = '#ffffff';
+            otherCtx.strokeStyle = '#333333';
+            otherCtx.font = 'bold 14px Arial';
+            otherCtx.textAlign = 'center';
+            otherCtx.lineWidth = 3;
+            
+            const sizeText = `${Math.abs(width)}×${Math.abs(height)}`;
+            const textX = scaledStartX + scaledWidth/2;
+            const textY = scaledStartY + scaledHeight/2;
+            
+            otherCtx.strokeText(sizeText, textX, textY);
+            otherCtx.fillText(sizeText, textX, textY);
+            
+            otherCtx.setLineDash([]);
+        }
+    }
+    
+    getRectangleData() {
+        return this.rectangles.map(rect => ({
+            x: rect.x / this.canvas.width,
+            y: rect.y / this.canvas.height,
+            width: rect.width / this.canvas.width,
+            height: rect.height / this.canvas.height
+        }));
+    }
+}
+
+// Global variables for rectangle drawers
+let canvas1_drawer, canvas2_drawer;
+
 // Add preview functionality
 document.getElementById('image1').addEventListener('change', function(e) {
-    previewImage(e.target, 'preview1');
+    previewImage(e.target, 'preview1', 'canvas1', 'canvas-container-1');
 });
 
 document.getElementById('image2').addEventListener('change', function(e) {
-    previewImage(e.target, 'preview2');
+    previewImage(e.target, 'preview2', 'canvas2', 'canvas-container-2');
 });
 
-function previewImage(input, previewId) {
+function previewImage(input, previewId, canvasId, containerId) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            let preview = document.getElementById(previewId);
-            if (!preview) {
-                preview = document.createElement('img');
-                preview.id = previewId;
-                preview.style.cssText = 'max-width: 200px; max-height: 200px; margin-top: 1rem; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);';
-                input.parentNode.appendChild(preview);
-            }
+            const preview = document.getElementById(previewId);
+            const container = document.getElementById(containerId);
+            
             preview.src = e.target.result;
+            preview.onload = function() {
+                // Show canvas container
+                container.style.display = 'block';
+                
+                // Initialize rectangle drawer
+                if (canvasId === 'canvas1') {
+                    canvas1_drawer = new RectangleDrawer(canvasId, previewId);
+                } else {
+                    canvas2_drawer = new RectangleDrawer(canvasId, previewId);
+                }
+                
+                // Update canvas size to match image
+                setTimeout(() => {
+                    if (canvasId === 'canvas1') {
+                        canvas1_drawer.updateCanvasSize();
+                    } else {
+                        canvas2_drawer.updateCanvasSize();
+                    }
+                }, 100);
+            };
         };
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+function clearRectangles(canvasId) {
+    if (canvasId === 'canvas1' && canvas1_drawer) {
+        canvas1_drawer.clearRectangles();
+    } else if (canvasId === 'canvas2' && canvas2_drawer) {
+        canvas2_drawer.clearRectangles();
+    }
+}
+
+function toggleDrawMode(canvasId) {
+    const drawer = canvasId === 'canvas1' ? canvas1_drawer : canvas2_drawer;
+    const buttonId = canvasId === 'canvas1' ? 'draw-mode-btn-1' : 'draw-mode-btn-2';
+    const indicatorId = canvasId === 'canvas1' ? 'mode-indicator-1' : 'mode-indicator-2';
+    
+    if (drawer) {
+        drawer.toggleDrawMode();
+        
+        // Update button text and indicator
+        const button = document.getElementById(buttonId);
+        const indicator = document.getElementById(indicatorId);
+        
+        if (drawer.drawMode) {
+            button.innerHTML = '✏️ Draw Mode';
+            button.style.background = '#667eea';
+            indicator.textContent = 'Click and drag to draw new rectangles';
+        } else {
+            button.innerHTML = '✋ Move/Resize Mode';  
+            button.style.background = '#4CAF50';
+            indicator.textContent = 'Drag to move, grab corners/edges to resize';
+        }
+    }
+}
+
+// Add rectangle data to form submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (canvas1_drawer && canvas2_drawer) {
+        const rect1Data = JSON.stringify(canvas1_drawer.getRectangleData());
+        const rect2Data = JSON.stringify(canvas2_drawer.getRectangleData());
+        
+        // Create hidden inputs for rectangle data
+        const input1 = document.createElement('input');
+        input1.type = 'hidden';
+        input1.name = 'rectangles1';
+        input1.value = rect1Data;
+        this.appendChild(input1);
+        
+        const input2 = document.createElement('input');
+        input2.type = 'hidden';
+        input2.name = 'rectangles2';
+        input2.value = rect2Data;
+        this.appendChild(input2);
+    }
+});
 </script>
 {% endblock %}

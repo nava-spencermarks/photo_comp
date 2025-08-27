@@ -28,6 +28,8 @@ def run_working_coverage():
         "test/test_main.py",
         "test/test_face_compare.py",
         "test/test_webapp.py",
+        "test/test_image_masking.py",
+        "test/test_rectangle_frontend.py",
     ]
 
     try:

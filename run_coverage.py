@@ -41,6 +41,8 @@ def run_local_coverage() -> object:
             "test/test_main.py",
             "test/test_face_compare.py",
             "test/test_webapp.py",
+            "test/test_image_masking.py",
+            "test/test_rectangle_frontend.py",
         ],
         # Fallback: run our test runner with coverage
         [
@@ -55,6 +57,8 @@ def run_local_coverage() -> object:
             "test/test_main.py",
             "test/test_face_compare.py",
             "test/test_webapp.py",
+            "test/test_image_masking.py",
+            "test/test_rectangle_frontend.py",
         ],
     ]
     success = False

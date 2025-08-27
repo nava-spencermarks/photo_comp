@@ -4,6 +4,7 @@ Tests for the Flask web application.
 """
 
 import io
+import json
 import os
 import sys
 import tempfile
@@ -223,6 +224,108 @@ class WebAppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Test flash message", response.data)
         self.assertIn(b"flash-message", response.data)
+
+    @patch("app.FaceComparator")
+    def test_compare_with_rectangle_data(self, mock_comparator_class):
+        """Test compare endpoint with rectangle masking data."""
+        # Mock the face comparator
+        mock_comparator = MagicMock()
+        mock_comparator.compare_faces.return_value = (
+            True,
+            "Distance: 0.234, Confidence: 92.1%",
+        )
+        mock_comparator_class.return_value = mock_comparator
+
+        # Create test images
+        img1 = self.create_test_image()
+        img2 = self.create_test_image()
+
+        # Rectangle data (normalized coordinates)
+        rectangles = [{"x": 0.2, "y": 0.3, "width": 0.4, "height": 0.2}]
+
+        data = {
+            "image1": (img1, "test1.png"),
+            "image2": (img2, "test2.png"),
+            "rectangles1": json.dumps(rectangles),
+            "rectangles2": json.dumps(rectangles),
+        }
+
+        response = self.client.post("/compare", data=data, follow_redirects=True)
+
+        # Should show results page with masking info
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Comparison Results", response.data)
+        self.assertIn(b"Masked Comparison Applied", response.data)
+        self.assertIn(b"Rectangles used: 1", response.data)
+
+    @patch("app.FaceComparator")
+    def test_compare_without_rectangle_data(self, mock_comparator_class):
+        """Test compare endpoint without rectangle masking."""
+        # Mock the face comparator
+        mock_comparator = MagicMock()
+        mock_comparator.compare_faces.return_value = (
+            False,
+            "Distance: 0.789, Confidence: 88.3%",
+        )
+        mock_comparator_class.return_value = mock_comparator
+
+        # Create test images
+        img1 = self.create_test_image()
+        img2 = self.create_test_image()
+
+        data = {
+            "image1": (img1, "test1.png"),
+            "image2": (img2, "test2.png"),
+            # No rectangle data
+        }
+
+        response = self.client.post("/compare", data=data, follow_redirects=True)
+
+        # Should show results page without masking info
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Comparison Results", response.data)
+        self.assertNotIn(b"Masked Comparison Applied", response.data)
+        self.assertIn(b"Full image analysis", response.data)
+
+    @patch("app.ImageMasker")
+    @patch("app.FaceComparator")
+    def test_compare_with_masking_error(self, mock_comparator_class, mock_masker_class):
+        """Test compare endpoint when masking fails."""
+        # Mock the masker to throw an exception
+        mock_masker = MagicMock()
+        mock_masker.parse_rectangle_data.side_effect = Exception("Masking failed")
+        mock_masker_class.return_value = mock_masker
+
+        # Create test images
+        img1 = self.create_test_image()
+        img2 = self.create_test_image()
+
+        data = {
+            "image1": (img1, "error1.png"),
+            "image2": (img2, "error2.png"),
+            "rectangles1": '[{"x": 0.1, "y": 0.1, "width": 0.2, "height": 0.2}]',
+        }
+
+        response = self.client.post("/compare", data=data)
+
+        # Should redirect back to index with error
+        self.assertEqual(response.status_code, 302)
+
+    def test_rectangle_data_validation(self):
+        """Test that rectangle data is properly validated."""
+        from src.image_masking import ImageMasker
+        
+        masker = ImageMasker()
+        
+        # Valid rectangle data
+        valid_json = '[{"x": 0.1, "y": 0.2, "width": 0.3, "height": 0.4}]'
+        rectangles = masker.parse_rectangle_data(valid_json)
+        self.assertEqual(len(rectangles), 1)
+        
+        # Invalid rectangle data
+        invalid_json = '[{"x": 1.5, "y": 0.2}]'  # x out of bounds, missing fields
+        rectangles = masker.parse_rectangle_data(invalid_json)
+        self.assertEqual(len(rectangles), 0)
 
 
 class WebAppIntegrationTestCase(unittest.TestCase):
