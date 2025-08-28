@@ -314,14 +314,14 @@ class WebAppTestCase(unittest.TestCase):
     def test_rectangle_data_validation(self):
         """Test that rectangle data is properly validated."""
         from src.image_masking import ImageMasker
-        
+
         masker = ImageMasker()
-        
+
         # Valid rectangle data
         valid_json = '[{"x": 0.1, "y": 0.2, "width": 0.3, "height": 0.4}]'
         rectangles = masker.parse_rectangle_data(valid_json)
         self.assertEqual(len(rectangles), 1)
-        
+
         # Invalid rectangle data
         invalid_json = '[{"x": 1.5, "y": 0.2}]'  # x out of bounds, missing fields
         rectangles = masker.parse_rectangle_data(invalid_json)
