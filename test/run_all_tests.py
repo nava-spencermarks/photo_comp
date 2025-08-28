@@ -61,7 +61,8 @@ def run_all_tests():
             # Show summary for this module
             print(f"Tests run: {result.testsRun}")
             print(
-                f"✅ Passed: {result.testsRun - len(result.failures) - len(result.errors)}"
+                f"✅ Passed: "
+                f"{result.testsRun - len(result.failures) - len(result.errors)}"
             )
             if result.failures:
                 print(f"❌ Failed: {len(result.failures)}")
@@ -115,7 +116,8 @@ def run_all_tests():
         status = "✅ PASS" if passed else "❌ FAIL"
         print(f"{status} - {description}")
         print(
-            f"    Tests: {details['total']} | Passed: {details['passed']} | Failed: {details['failed']} | Errors: {details['errors']}"
+            f"    Tests: {details['total']} | Passed: {details['passed']} | "
+            f"Failed: {details['failed']} | Errors: {details['errors']}"
         )
 
         total_tests += details["total"]
@@ -125,7 +127,8 @@ def run_all_tests():
 
     print("-" * 60)
     print(
-        f"OVERALL: {total_tests} tests | ✅ {total_passed} passed | ❌ {total_failed} failed | 💥 {total_errors} errors"
+        f"OVERALL: {total_tests} tests | ✅ {total_passed} passed | "
+        f"❌ {total_failed} failed | 💥 {total_errors} errors"
     )
     print("-" * 60)
 

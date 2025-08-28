@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 # Import after path modification  # noqa: E402
-from face_compare import FaceComparator
+from face_compare import FaceComparator  # noqa: E402
 
 
 class TestFaceComparator(unittest.TestCase):
@@ -250,7 +250,7 @@ class TestIntegration(unittest.TestCase):
                 )
             else:
                 # For different people, we expect either False or detection failure
-                # (Detection failure is also acceptable since it means no false positive)
+                # (Detection failure is also acceptable since no false positive)
                 self.assertIsInstance(
                     is_same, bool, f"Should return boolean result: {details}"
                 )
