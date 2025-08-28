@@ -57,7 +57,6 @@ class ImageMasker:
                     # Only add if rectangle has positive area after clamping
                     if clamped_rect["width"] > 0 and clamped_rect["height"] > 0:
                         valid_rectangles.append(clamped_rect)
-
             return valid_rectangles
 
         except (json.JSONDecodeError, TypeError, KeyError):
@@ -113,6 +112,7 @@ class ImageMasker:
             # Only draw if rectangle has positive area
             if x2 > x1 and y2 > y1:
                 draw.rectangle([x1, y1, x2 - 1, y2 - 1], fill=255)
+ 
 
         # Convert back to numpy array
         mask = np.array(mask_img) > 0
