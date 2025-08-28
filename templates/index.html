@@ -209,15 +209,26 @@ function redrawMasks(imageNum) {
     activeMasks.forEach(maskType => {
         const maskDef = RECTANGLE_PATTERNS[maskType];
         if (maskDef) {
-            const x = Math.round(maskDef.x * canvas.width);
-            const y = Math.round(maskDef.y * canvas.height);
-            const width = Math.round(maskDef.width * canvas.width);
-            const height = Math.round(maskDef.height * canvas.height);
+            // Ensure rectangles stay within canvas bounds
+            const x = Math.max(0, Math.min(canvas.width - 1, Math.round(maskDef.x * canvas.width)));
+            const y = Math.max(0, Math.min(canvas.height - 1, Math.round(maskDef.y * canvas.height)));
+            const maxWidth = canvas.width - x;
+            const maxHeight = canvas.height - y;
+            const width = Math.min(maxWidth, Math.round(maskDef.width * canvas.width));
+            const height = Math.min(maxHeight, Math.round(maskDef.height * canvas.height));
             
-            console.log(`Drawing ${maskType} mask at (${x}, ${y}) size ${width}x${height}`);
-            
-            ctx.fillStyle = '#555555';
-            ctx.fillRect(x, y, width, height);
+            // Only draw if rectangle has positive area
+            if (width > 0 && height > 0) {
+                console.log(`Drawing ${maskType} mask at (${x}, ${y}) size ${width}x${height}`);
+                
+                ctx.fillStyle = 'rgba(85, 85, 85, 0.5)';  // Semi-transparent
+                ctx.fillRect(x, y, width, height);
+                
+                // Draw border for clarity
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, width, height);
+            }
         }
     });
 }

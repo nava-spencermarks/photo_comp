@@ -36,10 +36,26 @@ class ImageMasker:
             valid_rectangles = []
             for rect in rectangles:
                 if all(key in rect for key in ['x', 'y', 'width', 'height']):
-                    # Ensure coordinates are valid (0-1 range for normalized)
-                    if (0 <= rect['x'] <= 1 and 0 <= rect['y'] <= 1 and
-                        0 < rect['width'] <= 1 and 0 < rect['height'] <= 1):
-                        valid_rectangles.append(rect)
+                    # Clamp coordinates to valid range instead of rejecting
+                    # This handles rectangles that might slightly exceed bounds
+                    x = max(0.0, min(1.0, rect['x']))
+                    y = max(0.0, min(1.0, rect['y']))
+                    
+                    # Adjust width and height to stay within bounds
+                    # If x is at the edge, width needs to be 0
+                    max_width = 1.0 - x
+                    max_height = 1.0 - y
+                    
+                    clamped_rect = {
+                        'x': x,
+                        'y': y,
+                        'width': max(0.0, min(max_width, rect['width'])),
+                        'height': max(0.0, min(max_height, rect['height']))
+                    }
+                    
+                    # Only add if rectangle has positive area after clamping
+                    if clamped_rect['width'] > 0 and clamped_rect['height'] > 0:
+                        valid_rectangles.append(clamped_rect)
                         
             return valid_rectangles
             
@@ -73,20 +89,27 @@ class ImageMasker:
         
         # Draw white rectangles for masked areas
         for rect in rectangles:
-            # Convert normalized coordinates to pixel coordinates
-            x1 = int(rect['x'] * width)
-            y1 = int(rect['y'] * height)
-            x2 = int((rect['x'] + rect['width']) * width)
-            y2 = int((rect['y'] + rect['height']) * height)
+            # Clamp normalized coordinates to valid range [0, 1]
+            rect_x = max(0.0, min(1.0, rect['x']))
+            rect_y = max(0.0, min(1.0, rect['y']))
+            rect_width = max(0.0, min(1.0 - rect_x, rect['width']))
+            rect_height = max(0.0, min(1.0 - rect_y, rect['height']))
             
-            # Ensure coordinates are within image bounds
+            # Convert normalized coordinates to pixel coordinates
+            x1 = int(rect_x * width)
+            y1 = int(rect_y * height)
+            x2 = int((rect_x + rect_width) * width)
+            y2 = int((rect_y + rect_height) * height)
+            
+            # Final bounds check to ensure we're within image
             x1 = max(0, min(x1, width - 1))
             y1 = max(0, min(y1, height - 1))
-            x2 = max(0, min(x2, width))
-            y2 = max(0, min(y2, height))
+            x2 = max(x1 + 1, min(x2, width))  # Ensure x2 > x1
+            y2 = max(y1 + 1, min(y2, height))  # Ensure y2 > y1
             
-            # Draw filled rectangle
-            draw.rectangle([x1, y1, x2, y2], fill=255)
+            # Only draw if rectangle has positive area
+            if x2 > x1 and y2 > y1:
+                draw.rectangle([x1, y1, x2 - 1, y2 - 1], fill=255)
         
         # Convert back to numpy array
         mask = np.array(mask_img) > 0
