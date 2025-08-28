@@ -20,7 +20,14 @@ wheels/
 .installed.cfg
 *.egg
 ./logs
-
+better.png
+logs/
+lookright.png
+rectangles.png
+test_masking.html
+test_ui_regression.html
+what.png
+whatswrong.png
 # Virtual Environment
 venv/
 env/
