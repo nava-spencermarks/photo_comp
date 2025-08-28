@@ -51,3 +51,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *_temp_copy.png
+/still.png
+/1.png
