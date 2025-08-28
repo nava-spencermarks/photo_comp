@@ -5,6 +5,9 @@ Simple Flask web app for face comparison.
 
 import os
 import tempfile
+import logging
+import json
+from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -17,12 +20,48 @@ from src.image_masking import ImageMasker
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['LOG_FOLDER'] = 'logs'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-# Create uploads directory if it doesn't exist
+# Create directories if they don't exist
 Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
+Path(app.config['LOG_FOLDER']).mkdir(exist_ok=True)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(app.config['LOG_FOLDER'], 'app.log')),
+        logging.StreamHandler()
+    ]
+)
+
+# Create user activity logger
+activity_logger = logging.getLogger('user_activity')
+activity_handler = logging.FileHandler(os.path.join(app.config['LOG_FOLDER'], 'user_activity.log'))
+activity_formatter = logging.Formatter('%(asctime)s - %(message)s')
+activity_handler.setFormatter(activity_formatter)
+activity_logger.addHandler(activity_handler)
+activity_logger.setLevel(logging.INFO)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
+
+
+def log_user_activity(action, details=None, ip_address=None):
+    """Log user activity with timestamp, IP, and action details."""
+    if ip_address is None:
+        ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', 'unknown'))
+    
+    log_entry = {
+        'timestamp': datetime.now().isoformat(),
+        'ip_address': ip_address,
+        'action': action,
+        'details': details or {},
+        'user_agent': request.headers.get('User-Agent', 'unknown')
+    }
+    
+    activity_logger.info(json.dumps(log_entry))
 
 
 def allowed_file(filename):
@@ -42,15 +81,19 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     """Main page with upload form."""
+    log_user_activity('page_visit', {'page': 'index'})
     return render_template('index.html')
 
 
 @app.route('/compare', methods=['POST'])
 def compare_faces():
     """Handle face comparison request."""
+    log_user_activity('face_comparison_attempt')
+    
     # Check if files were uploaded
     if 'image1' not in request.files or 'image2' not in request.files:
         flash('Please select both images')
+        log_user_activity('face_comparison_failed', {'reason': 'missing_files'})
         return redirect(url_for('index'))
     
     file1 = request.files['image1']
@@ -59,11 +102,13 @@ def compare_faces():
     # Check if files were actually selected
     if file1.filename == '' or file2.filename == '':
         flash('Please select both images')
+        log_user_activity('face_comparison_failed', {'reason': 'empty_filenames'})
         return redirect(url_for('index'))
     
     # Check file types
     if not (allowed_file(file1.filename) and allowed_file(file2.filename)):
         flash('Please upload valid image files (PNG, JPG, JPEG, GIF, BMP)')
+        log_user_activity('face_comparison_failed', {'reason': 'invalid_file_types', 'files': [file1.filename, file2.filename]})
         return redirect(url_for('index'))
     
     try:
@@ -134,10 +179,19 @@ def compare_faces():
             'rectangles_count': len(rectangles1) if rectangles1 else len(rectangles2) if rectangles2 else 0
         }
         
+        # Log successful comparison
+        log_user_activity('face_comparison_success', {
+            'files': [filename1, filename2],
+            'result': is_same_person,
+            'mask_applied': mask_applied,
+            'rectangles_count': result_data['rectangles_count']
+        })
+        
         return render_template('result.html', **result_data)
         
     except Exception as e:
         flash(f'Error processing images: {str(e)}')
+        log_user_activity('face_comparison_error', {'error': str(e)})
         return redirect(url_for('index'))
 
 
@@ -145,8 +199,42 @@ def compare_faces():
 def uploaded_file(filename):
     """Serve uploaded files."""
     from flask import send_from_directory
+    log_user_activity('file_access', {'filename': filename})
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
+@app.route('/admin/logs')
+def view_logs():
+    """View user activity logs (admin only)."""
+    log_user_activity('admin_logs_access')
+    
+    try:
+        log_file = os.path.join(app.config['LOG_FOLDER'], 'user_activity.log')
+        logs = []
+        
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                for line in f:
+                    if line.strip():
+                        try:
+                            # Parse the log line (timestamp - json_data)
+                            parts = line.strip().split(' - ', 1)
+                            if len(parts) == 2:
+                                timestamp_str, json_str = parts
+                                log_data = json.loads(json_str)
+                                logs.append(log_data)
+                        except json.JSONDecodeError:
+                            continue
+        
+        # Sort by timestamp descending (most recent first)
+        logs.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+        return render_template('logs.html', logs=logs)
+        
+    except Exception as e:
+        flash(f'Error reading logs: {str(e)}')
+        return redirect(url_for('index'))
+
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8060)
