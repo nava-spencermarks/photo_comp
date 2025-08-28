@@ -25,11 +25,12 @@
                         <div style="margin-bottom: 1rem;">
                             <div style="font-weight: bold; margin-bottom: 0.5rem; color: #555;">Mask Areas:</div>
                             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                <button type="button" class="mask-btn" onclick="toggleMask('forehead', 1)" style="background: #667eea;">Forehead</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('eyes', 1)" style="background: #667eea;">Eyes</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('nose', 1)" style="background: #667eea;">Nose</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('mouth', 1)" style="background: #667eea;">Mouth</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('chin', 1)" style="background: #667eea;">Chin</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_top', 1)" style="background: #667eea;">Top Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_middle', 1)" style="background: #667eea;">Middle Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_bottom', 1)" style="background: #667eea;">Bottom Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_left', 1)" style="background: #667eea;">Left Side</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_right', 1)" style="background: #667eea;">Right Side</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_center', 1)" style="background: #667eea;">Center</button>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
@@ -37,7 +38,7 @@
                             <button type="button" class="btn-small" onclick="flipImage('preview1')" style="background: #667eea;">🔄 Flip Upside Down</button>
                         </div>
                         <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                            <div>Click buttons to mask facial features</div>
+                            <div>Click buttons to add rectangle masks</div>
                             <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
                                 Active masks show with darker buttons
                             </div>
@@ -67,11 +68,12 @@
                         <div style="margin-bottom: 1rem;">
                             <div style="font-weight: bold; margin-bottom: 0.5rem; color: #555;">Mask Areas:</div>
                             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                <button type="button" class="mask-btn" onclick="toggleMask('forehead', 2)" style="background: #667eea;">Forehead</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('eyes', 2)" style="background: #667eea;">Eyes</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('nose', 2)" style="background: #667eea;">Nose</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('mouth', 2)" style="background: #667eea;">Mouth</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('chin', 2)" style="background: #667eea;">Chin</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_top', 2)" style="background: #667eea;">Top Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_middle', 2)" style="background: #667eea;">Middle Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_bottom', 2)" style="background: #667eea;">Bottom Bar</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_left', 2)" style="background: #667eea;">Left Side</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_right', 2)" style="background: #667eea;">Right Side</button>
+                                <button type="button" class="mask-btn" onclick="toggleMask('rect_center', 2)" style="background: #667eea;">Center</button>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
@@ -79,7 +81,7 @@
                             <button type="button" class="btn-small" onclick="flipImage('preview2')" style="background: #667eea;">🔄 Flip Upside Down</button>
                         </div>
                         <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                            <div>Click buttons to mask facial features</div>
+                            <div>Click buttons to add rectangle masks</div>
                             <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
                                 Active masks show with darker buttons
                             </div>
@@ -108,13 +110,19 @@
 </div>
 
 <script>
-// Predefined face masking system - adjusted positions based on actual face layout
-const FACE_MASKS = {
-    forehead: { x: 0.35, y: 0.15, width: 0.30, height: 0.15 },
-    eyes: { x: 0.30, y: 0.30, width: 0.40, height: 0.12 },
-    nose: { x: 0.40, y: 0.45, width: 0.20, height: 0.15 },
-    mouth: { x: 0.35, y: 0.60, width: 0.30, height: 0.10 },
-    chin: { x: 0.35, y: 0.75, width: 0.30, height: 0.15 }
+// Rectangle patterns matching rectangles.png - 6 specific masking patterns
+const RECTANGLE_PATTERNS = {
+    // Horizontal rectangles (left panel patterns)
+    rect_top: { x: 0.15, y: 0.10, width: 0.70, height: 0.25 },      // Top horizontal bar
+    rect_middle: { x: 0.20, y: 0.40, width: 0.60, height: 0.20 },   // Middle horizontal bar
+    
+    // Vertical rectangles (right panel patterns) 
+    rect_left: { x: 0.15, y: 0.20, width: 0.25, height: 0.60 },     // Left vertical bar
+    rect_right: { x: 0.60, y: 0.20, width: 0.25, height: 0.60 },    // Right vertical bar
+    
+    // Additional pattern options
+    rect_bottom: { x: 0.20, y: 0.65, width: 0.60, height: 0.20 },   // Bottom horizontal bar
+    rect_center: { x: 0.35, y: 0.35, width: 0.30, height: 0.30 }    // Center square
 };
 
 // Track active masks for each image
@@ -199,7 +207,7 @@ function redrawMasks(imageNum) {
     
     // Draw each active mask
     activeMasks.forEach(maskType => {
-        const maskDef = FACE_MASKS[maskType];
+        const maskDef = RECTANGLE_PATTERNS[maskType];
         if (maskDef) {
             const x = Math.round(maskDef.x * canvas.width);
             const y = Math.round(maskDef.y * canvas.height);
@@ -250,9 +258,10 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                     canvas.style.width = displayWidth + 'px';
                     canvas.style.height = displayHeight + 'px';
                     canvas.style.position = 'absolute';
-                    canvas.style.top = '0';
-                    canvas.style.left = '0';
+                    canvas.style.top = '0px';
+                    canvas.style.left = '0px';
                     canvas.style.pointerEvents = 'none';
+                    canvas.style.zIndex = '10';
                     
                     // Store references
                     if (imageNum === 1) {
@@ -289,7 +298,7 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
 document.querySelector('form').addEventListener('submit', function(e) {
     // Convert active masks to rectangle format for backend
     const rects1 = Array.from(activeMasks1).map(maskType => {
-        const mask = FACE_MASKS[maskType];
+        const mask = RECTANGLE_PATTERNS[maskType];
         return {
             x: mask.x,
             y: mask.y, 
@@ -299,7 +308,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
     });
     
     const rects2 = Array.from(activeMasks2).map(maskType => {
-        const mask = FACE_MASKS[maskType];
+        const mask = RECTANGLE_PATTERNS[maskType];
         return {
             x: mask.x,
             y: mask.y,
