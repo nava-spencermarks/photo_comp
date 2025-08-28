@@ -34,6 +34,7 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" class="btn-small" id="drawModeBtn1" onclick="toggleDrawMode(1)" style="background: #667eea;">✏️ Draw Mode</button>
                             <button type="button" class="btn-small" onclick="clearAllMasks(1)" style="background: #f44336;">🗑️ Clear All</button>
                             <button type="button" class="btn-small" onclick="flipImage('preview1')" style="background: #667eea;">🔄 Flip Upside Down</button>
                         </div>
@@ -77,6 +78,7 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" class="btn-small" id="drawModeBtn2" onclick="toggleDrawMode(2)" style="background: #667eea;">✏️ Draw Mode</button>
                             <button type="button" class="btn-small" onclick="clearAllMasks(2)" style="background: #f44336;">🗑️ Clear All</button>
                             <button type="button" class="btn-small" onclick="flipImage('preview2')" style="background: #667eea;">🔄 Flip Upside Down</button>
                         </div>
@@ -129,6 +131,279 @@ const RECTANGLE_PATTERNS = {
 let activeMasks1 = new Set();
 let activeMasks2 = new Set();
 let canvas1, canvas2, img1, img2;
+
+// RectangleDrawer class for managing rectangle drawing
+class RectangleDrawer {
+    constructor(canvasId, imageId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.imageElement = document.getElementById(imageId);
+        this.rectangles = [];
+        this.isDrawing = false;
+        this.isDrawMode = true;
+        this.currentRect = null;
+        this.selectedRect = null;
+        this.startX = 0;
+        this.startY = 0;
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+    }
+    
+    updateCanvasSize() {
+        if (this.imageElement) {
+            this.canvas.width = this.imageElement.offsetWidth;
+            this.canvas.height = this.imageElement.offsetHeight;
+        }
+    }
+    
+    getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+    
+    handleMouseDown(e) {
+        const pos = this.getMousePos(e);
+        this.startX = pos.x;
+        this.startY = pos.y;
+        
+        if (this.isDrawMode) {
+            this.isDrawing = true;
+            this.currentRect = {
+                x: pos.x,
+                y: pos.y,
+                width: 0,
+                height: 0
+            };
+        } else {
+            this.selectedRect = this.findRectangleAt(pos.x, pos.y);
+            if (this.selectedRect) {
+                this.isDrawing = true;
+            }
+        }
+    }
+    
+    handleMouseMove(e) {
+        if (!this.isDrawing) return;
+        
+        const pos = this.getMousePos(e);
+        
+        if (this.isDrawMode && this.currentRect) {
+            this.currentRect.width = pos.x - this.currentRect.x;
+            this.currentRect.height = pos.y - this.currentRect.y;
+            this.redraw();
+            this.syncDrawingPreview(this.currentRect.width, this.currentRect.height);
+        } else if (!this.isDrawMode && this.selectedRect) {
+            const dx = pos.x - this.startX;
+            const dy = pos.y - this.startY;
+            this.selectedRect.x += dx;
+            this.selectedRect.y += dy;
+            this.startX = pos.x;
+            this.startY = pos.y;
+            this.redraw();
+            this.syncRectangles();
+        }
+    }
+    
+    handleMouseUp(e) {
+        if (this.isDrawMode && this.currentRect && this.isDrawing) {
+            if (Math.abs(this.currentRect.width) > 10 && Math.abs(this.currentRect.height) > 10) {
+                // Normalize rectangle
+                if (this.currentRect.width < 0) {
+                    this.currentRect.x += this.currentRect.width;
+                    this.currentRect.width = -this.currentRect.width;
+                }
+                if (this.currentRect.height < 0) {
+                    this.currentRect.y += this.currentRect.height;
+                    this.currentRect.height = -this.currentRect.height;
+                }
+                this.rectangles.push(this.currentRect);
+                this.syncRectangles();
+            }
+            this.currentRect = null;
+        }
+        
+        this.isDrawing = false;
+        this.selectedRect = null;
+        this.redraw();
+    }
+    
+    findRectangleAt(x, y) {
+        for (let i = this.rectangles.length - 1; i >= 0; i--) {
+            const rect = this.rectangles[i];
+            if (x >= rect.x && x <= rect.x + rect.width &&
+                y >= rect.y && y <= rect.y + rect.height) {
+                return rect;
+            }
+        }
+        return null;
+    }
+    
+    redraw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw existing rectangles
+        this.rectangles.forEach(rect => {
+            this.ctx.fillStyle = 'rgba(85, 85, 85, 0.5)';
+            this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            this.ctx.strokeStyle = '#333';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        });
+        
+        // Draw current rectangle being drawn
+        if (this.currentRect && this.isDrawing) {
+            this.ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+            this.ctx.fillRect(this.currentRect.x, this.currentRect.y, 
+                            this.currentRect.width, this.currentRect.height);
+            this.ctx.strokeStyle = '#667eea';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(this.currentRect.x, this.currentRect.y,
+                              this.currentRect.width, this.currentRect.height);
+        }
+    }
+    
+    clearRectangles() {
+        this.rectangles = [];
+        this.redraw();
+        this.syncRectangles();
+    }
+    
+    toggleDrawMode() {
+        this.isDrawMode = !this.isDrawMode;
+        return this.isDrawMode;
+    }
+    
+    syncRectangles() {
+        // Sync with other canvas
+        if (window.canvas1_drawer && window.canvas2_drawer) {
+            const otherDrawer = (this === window.canvas1_drawer) ? 
+                window.canvas2_drawer : window.canvas1_drawer;
+            if (otherDrawer) {
+                // Calculate scale factors for proper synchronization
+                const scaleX = otherDrawer.canvas.width / this.canvas.width;
+                const scaleY = otherDrawer.canvas.height / this.canvas.height;
+                
+                // Copy and scale rectangles
+                otherDrawer.rectangles = this.rectangles.map(rect => ({
+                    x: rect.x * scaleX,
+                    y: rect.y * scaleY,
+                    width: rect.width * scaleX,
+                    height: rect.height * scaleY
+                }));
+                otherDrawer.redraw();
+            }
+        }
+    }
+    
+    getResizeHandle(x, y, rect) {
+        // Check which resize handle the mouse is over
+        const handleSize = 8;
+        const handles = [
+            { x: rect.x, y: rect.y, type: 'nw' },
+            { x: rect.x + rect.width, y: rect.y, type: 'ne' },
+            { x: rect.x, y: rect.y + rect.height, type: 'sw' },
+            { x: rect.x + rect.width, y: rect.y + rect.height, type: 'se' }
+        ];
+        
+        for (const handle of handles) {
+            if (Math.abs(x - handle.x) < handleSize && Math.abs(y - handle.y) < handleSize) {
+                return handle.type;
+            }
+        }
+        return null;
+    }
+    
+    resizeRectangle(rect, handle, dx, dy) {
+        // Resize rectangle based on handle type
+        switch (handle) {
+            case 'nw':
+                rect.x += dx;
+                rect.y += dy;
+                rect.width -= dx;
+                rect.height -= dy;
+                break;
+            case 'ne':
+                rect.width += dx;
+                rect.y += dy;
+                rect.height -= dy;
+                break;
+            case 'sw':
+                rect.x += dx;
+                rect.width -= dx;
+                rect.height += dy;
+                break;
+            case 'se':
+                rect.width += dx;
+                rect.height += dy;
+                break;
+        }
+        
+        // Ensure minimum size
+        rect.width = Math.max(10, rect.width);
+        rect.height = Math.max(10, rect.height);
+    }
+    
+    drawPreview(rect) {
+        // Draw preview of rectangle being created or resized
+        this.ctx.save();
+        this.ctx.strokeStyle = '#667eea';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        this.ctx.restore();
+    }
+    
+    syncDrawingPreview(width, height) {
+        // Sync current drawing preview with other canvas
+        if (window.canvas1_drawer && window.canvas2_drawer) {
+            const otherDrawer = (this === window.canvas1_drawer) ? 
+                window.canvas2_drawer : window.canvas1_drawer;
+            if (otherDrawer && this.currentRect) {
+                const otherCtx = otherDrawer.ctx;
+                const scaleX = otherDrawer.canvas.width / this.canvas.width;
+                const scaleY = otherDrawer.canvas.height / this.canvas.height;
+                
+                const scaledStartX = this.currentRect.x * scaleX;
+                const scaledStartY = this.currentRect.y * scaleY;
+                const scaledWidth = width * scaleX;
+                const scaledHeight = height * scaleY;
+                
+                otherCtx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+                otherCtx.fillRect(scaledStartX, scaledStartY, scaledWidth, scaledHeight);
+                
+                otherDrawer.currentRect = {
+                    x: scaledStartX,
+                    y: scaledStartY,
+                    width: scaledWidth,
+                    height: scaledHeight
+                };
+                otherDrawer.redraw();
+            }
+        }
+    }
+    
+    getRectangleData() {
+        // Return normalized rectangle data (0-1 scale)
+        return this.rectangles.map(rect => ({
+            x: rect.x / this.canvas.width,
+            y: rect.y / this.canvas.height,
+            width: rect.width / this.canvas.width,
+            height: rect.height / this.canvas.height
+        }));
+    }
+}
+
+// Global drawer instances
+let canvas1_drawer = null;
+let canvas2_drawer = null;
 
 // Image flip functionality
 function flipImage(imageId) {
@@ -263,13 +538,15 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                     canvas.style.pointerEvents = 'none';
                     canvas.style.zIndex = '10';
                     
-                    // Store references
+                    // Store references and create drawer
                     if (imageNum === 1) {
                         canvas1 = canvas;
                         img1 = preview;
+                        canvas1_drawer = new RectangleDrawer(canvasId, previewId);
                     } else {
                         canvas2 = canvas;
                         img2 = preview;
+                        canvas2_drawer = new RectangleDrawer(canvasId, previewId);
                     }
                     
                     // Clear any existing masks
@@ -296,26 +573,39 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
 
 // Form submission with mask data
 document.querySelector('form').addEventListener('submit', function(e) {
-    // Convert active masks to rectangle format for backend
-    const rects1 = Array.from(activeMasks1).map(maskType => {
-        const mask = RECTANGLE_PATTERNS[maskType];
-        return {
-            x: mask.x,
-            y: mask.y, 
-            width: mask.width,
-            height: mask.height
-        };
-    });
+    // Get rectangle data from drawers if they exist
+    let rects1 = [];
+    let rects2 = [];
     
-    const rects2 = Array.from(activeMasks2).map(maskType => {
-        const mask = RECTANGLE_PATTERNS[maskType];
-        return {
-            x: mask.x,
-            y: mask.y,
-            width: mask.width, 
-            height: mask.height
-        };
-    });
+    if (window.canvas1_drawer) {
+        rects1 = canvas1_drawer.getRectangleData();
+    } else {
+        // Fallback to mask patterns
+        rects1 = Array.from(activeMasks1).map(maskType => {
+            const mask = RECTANGLE_PATTERNS[maskType];
+            return {
+                x: mask.x,
+                y: mask.y, 
+                width: mask.width,
+                height: mask.height
+            };
+        });
+    }
+    
+    if (window.canvas2_drawer) {
+        rects2 = canvas2_drawer.getRectangleData();
+    } else {
+        // Fallback to mask patterns
+        rects2 = Array.from(activeMasks2).map(maskType => {
+            const mask = RECTANGLE_PATTERNS[maskType];
+            return {
+                x: mask.x,
+                y: mask.y,
+                width: mask.width, 
+                height: mask.height
+            };
+        });
+    }
     
     // Add hidden inputs
     const input1 = document.createElement('input');

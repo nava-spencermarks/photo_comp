@@ -24,13 +24,14 @@ class RectangleFrontendTestCase(unittest.TestCase):
         self.app.config["TESTING"] = True
         self.app.config["WTF_CSRF_ENABLED"] = False
         self.app.config["UPLOAD_FOLDER"] = tempfile.mkdtemp()
-        
+
         # Create test upload directory
         Path(self.app.config["UPLOAD_FOLDER"]).mkdir(exist_ok=True)
 
     def tearDown(self):
         """Clean up test environment."""
         import shutil
+
         if os.path.exists(self.app.config["UPLOAD_FOLDER"]):
             shutil.rmtree(self.app.config["UPLOAD_FOLDER"])
 
@@ -38,13 +39,15 @@ class RectangleFrontendTestCase(unittest.TestCase):
         """Test that rectangle drawing JavaScript classes are present."""
         # This is a basic test to verify the JavaScript structure
         # In a real scenario, we'd use a JavaScript testing framework
-        
+
         # Read the index template to verify JavaScript is present
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-            
+
         # Verify key JavaScript components are present
         self.assertIn("class RectangleDrawer", content)
         self.assertIn("handleMouseDown", content)
@@ -56,26 +59,30 @@ class RectangleFrontendTestCase(unittest.TestCase):
 
     def test_canvas_elements_present_in_template(self):
         """Test that canvas elements are present in the template."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-            
+
         # Verify canvas elements are present
         self.assertIn('<canvas id="canvas1"', content)
         self.assertIn('<canvas id="canvas2"', content)
-        self.assertIn('canvas-container-1', content)
-        self.assertIn('canvas-container-2', content)
-        self.assertIn('Clear All', content)
-        self.assertIn('Draw Mode', content)
+        self.assertIn("canvas-container-1", content)
+        self.assertIn("canvas-container-2", content)
+        self.assertIn("Clear All", content)
+        self.assertIn("Draw Mode", content)
 
     def test_css_classes_present_in_base_template(self):
         """Test that CSS classes for canvas controls are present."""
-        base_path = os.path.join(os.path.dirname(__file__), "..", "templates", "base.html")
-        
-        with open(base_path, 'r') as f:
+        base_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "base.html"
+        )
+
+        with open(base_path, "r") as f:
             content = f.read()
-            
+
         # Verify CSS classes are present
         self.assertIn(".canvas-controls", content)
         self.assertIn(".btn-small", content)
@@ -83,11 +90,13 @@ class RectangleFrontendTestCase(unittest.TestCase):
 
     def test_form_submission_rectangle_data(self):
         """Test that rectangle data is added to form submission."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-            
+
         # Verify form submission code is present
         self.assertIn("addEventListener('submit'", content)
         self.assertIn("getRectangleData", content)
@@ -101,36 +110,40 @@ class RectangleDrawerUnitTests(unittest.TestCase):
 
     def test_rectangle_drawer_methods_defined(self):
         """Test that all required methods are defined in JavaScript."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-        
+
         required_methods = [
             "setupEventListeners",
-            "updateCanvasSize", 
+            "updateCanvasSize",
             "getMousePos",
             "handleMouseDown",
-            "handleMouseMove", 
+            "handleMouseMove",
             "handleMouseUp",
             "findRectangleAt",
             "redraw",
             "clearRectangles",
             "toggleDrawMode",
             "syncRectangles",
-            "getRectangleData"
+            "getRectangleData",
         ]
-        
+
         for method in required_methods:
             self.assertIn(method, content, f"Method {method} not found in JavaScript")
 
     def test_rectangle_synchronization_logic(self):
         """Test that rectangle synchronization logic is present."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-        
+
         # Verify sync logic components
         self.assertIn("syncRectangles", content)
         self.assertIn("syncDrawingPreview", content)
@@ -140,11 +153,13 @@ class RectangleDrawerUnitTests(unittest.TestCase):
 
     def test_rectangle_data_structure(self):
         """Test that rectangle data structure is properly normalized."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-        
+
         # Verify normalization logic (converting to relative coordinates)
         self.assertIn("canvas.width", content)
         self.assertIn("canvas.height", content)
@@ -152,11 +167,13 @@ class RectangleDrawerUnitTests(unittest.TestCase):
 
     def test_event_handling_structure(self):
         """Test that event handling is properly structured."""
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "index.html")
-        
-        with open(template_path, 'r') as f:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "index.html"
+        )
+
+        with open(template_path, "r") as f:
             content = f.read()
-        
+
         # Verify event handling
         self.assertIn("addEventListener", content)
         self.assertIn("mousedown", content)
