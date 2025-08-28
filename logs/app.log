@@ -34,3 +34,4 @@
 2025-08-28 15:05:45,495 - INFO - 97.80.103.132 - - [28/Aug/2025 15:05:45] "POST /compare HTTP/1.1" 200 -
 2025-08-28 15:05:45,566 - INFO - {"timestamp": "2025-08-28T15:05:45.566382", "ip_address": "97.80.103.132", "action": "file_access", "details": {"filename": "me_close.png"}, "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15"}
 2025-08-28 15:05:45,571 - INFO - 97.80.103.132 - - [28/Aug/2025 15:05:45] "GET /uploads/me_close.png HTTP/1.1" 200 -
+ 

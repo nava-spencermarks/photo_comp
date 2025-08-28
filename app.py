@@ -10,12 +10,13 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash,send_from_directory
 from werkzeug.utils import secure_filename
 
 # Import after path modification  # noqa: E402
 from src.face_compare import FaceComparator
 from src.image_masking import ImageMasker
+from flask import send_from_directory
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
@@ -198,7 +199,6 @@ def compare_faces():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     """Serve uploaded files."""
-    from flask import send_from_directory
     log_user_activity('file_access', {'filename': filename})
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
