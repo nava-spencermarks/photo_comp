@@ -13,6 +13,7 @@ from werkzeug.utils import secure_filename
 # Import after path modification  # noqa: E402
 from src.face_compare import FaceComparator
 from src.image_masking import ImageMasker
+from flask import send_from_directory
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
@@ -144,9 +145,8 @@ def compare_faces():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     """Serve uploaded files."""
-    from flask import send_from_directory
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8060)
