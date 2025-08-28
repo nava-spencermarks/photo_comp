@@ -17,7 +17,7 @@ from PIL import Image
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 # Import after path modification  # noqa: E402
-import inspect_image
+import inspect_image  # noqa: E402
 
 
 class TestInspectImage(unittest.TestCase):

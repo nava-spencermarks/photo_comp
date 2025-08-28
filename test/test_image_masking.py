@@ -15,7 +15,7 @@ from PIL import Image
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 # Import after path modification  # noqa: E402
-from src.image_masking import ImageMasker
+from src.image_masking import ImageMasker  # noqa: E402
 
 
 class ImageMaskingTestCase(unittest.TestCase):
@@ -91,11 +91,25 @@ class ImageMaskingTestCase(unittest.TestCase):
         parsed = self.masker.parse_rectangle_data(json_str)
         self.assertEqual(len(parsed), 0)
 
-        # Out of bounds coordinates
-        invalid_data = [{"x": 1.5, "y": 0.2, "width": 0.3, "height": 0.4}]
+        # Out of bounds coordinates - should be clamped, not rejected
+        invalid_data = [{"x": 0.8, "y": 0.2, "width": 0.3, "height": 0.4}]
+ 
         json_str = json.dumps(invalid_data)
         parsed = self.masker.parse_rectangle_data(json_str)
-        self.assertEqual(len(parsed), 0)
+        # Should clamp width to fit within bounds
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["x"], 0.8)
+        self.assertEqual(parsed[0]["y"], 0.2)
+        self.assertAlmostEqual(
+            parsed[0]["width"], 0.2, places=10
+        )  # Clamped from 0.3 to 0.2
+        self.assertEqual(parsed[0]["height"], 0.4)
+
+        # Rectangle that would have no area after clamping
+        invalid_data = [{"x": 1.0, "y": 1.0, "width": 0.3, "height": 0.4}]
+        json_str = json.dumps(invalid_data)
+        parsed = self.masker.parse_rectangle_data(json_str)
+        self.assertEqual(len(parsed), 0)  # Should be rejected as it has no area
 
     def test_create_mask_from_rectangles_empty(self):
         """Test creating mask with no rectangles."""

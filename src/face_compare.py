@@ -173,7 +173,8 @@ class FaceComparator:
     def compare_faces(self, image1_path, image2_path):
         """Compare faces between two images with robust detection."""
         print(
-            f"Comparing {os.path.basename(image1_path)} vs {os.path.basename(image2_path)}"
+            f"Comparing {os.path.basename(image1_path)} vs "
+            f"{os.path.basename(image2_path)}"
         )
         print("=" * 60)
 

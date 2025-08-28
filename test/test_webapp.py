@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 # Import after path modification  # noqa: E402
-from app import app
+from app import app  # noqa: E402
 
 
 class WebAppTestCase(unittest.TestCase):
@@ -370,7 +370,8 @@ class WebAppIntegrationTestCase(unittest.TestCase):
 
         response = self.client.post("/compare", data=data, follow_redirects=True)
 
-        # Should complete successfully (may or may not match depending on face detection)
+        # Should complete successfully (may or may not match depending on face
+        # detection)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Comparison Results", response.data)
 

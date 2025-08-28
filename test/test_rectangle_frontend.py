@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 # Import after path modification  # noqa: E402
-from app import app
+from app import app  # noqa: E402
 
 
 class RectangleFrontendTestCase(unittest.TestCase):
