@@ -17,8 +17,8 @@
                     </p>
                 </div>
                 <div class="image-canvas-container" id="canvas-container-1" style="display: none;">
-                    <div style="position: relative;">
-                        <img id="preview1" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease;">
+                    <div style="position: relative; display: inline-block; margin: 0 auto;">
+                        <img id="preview1" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease; display: block;">
                         <canvas id="canvas1" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
                     </div>
                     <div class="canvas-controls">
@@ -60,8 +60,8 @@
                     </p>
                 </div>
                 <div class="image-canvas-container" id="canvas-container-2" style="display: none;">
-                    <div style="position: relative;">
-                        <img id="preview2" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease;">
+                    <div style="position: relative; display: inline-block; margin: 0 auto;">
+                        <img id="preview2" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease; display: block;">
                         <canvas id="canvas2" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
                     </div>
                     <div class="canvas-controls">
@@ -110,19 +110,19 @@
 </div>
 
 <script>
-// Rectangle patterns matching rectangles.png - 6 specific masking patterns
+// Rectangle patterns - masks that extend to edges like in correct.png
 const RECTANGLE_PATTERNS = {
-    // Horizontal rectangles (left panel patterns)
-    rect_top: { x: 0.15, y: 0.10, width: 0.70, height: 0.25 },      // Top horizontal bar
-    rect_middle: { x: 0.20, y: 0.40, width: 0.60, height: 0.20 },   // Middle horizontal bar
+    // Horizontal rectangles that span full width
+    rect_top: { x: 0, y: 0, width: 1.0, height: 0.35 },           // Top horizontal bar
+    rect_middle: { x: 0, y: 0.35, width: 1.0, height: 0.30 },     // Middle horizontal bar
+    rect_bottom: { x: 0, y: 0.65, width: 1.0, height: 0.35 },     // Bottom horizontal bar
     
-    // Vertical rectangles (right panel patterns) 
-    rect_left: { x: 0.15, y: 0.20, width: 0.25, height: 0.60 },     // Left vertical bar
-    rect_right: { x: 0.60, y: 0.20, width: 0.25, height: 0.60 },    // Right vertical bar
+    // Vertical rectangles that span full height
+    rect_left: { x: 0, y: 0, width: 0.35, height: 1.0 },          // Left vertical bar
+    rect_right: { x: 0.65, y: 0, width: 0.35, height: 1.0 },      // Right vertical bar
     
-    // Additional pattern options
-    rect_bottom: { x: 0.20, y: 0.65, width: 0.60, height: 0.20 },   // Bottom horizontal bar
-    rect_center: { x: 0.35, y: 0.35, width: 0.30, height: 0.30 }    // Center square
+    // Center pattern
+    rect_center: { x: 0.30, y: 0.30, width: 0.40, height: 0.40 }  // Center square
 };
 
 // Track active masks for each image
@@ -246,9 +246,6 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                 // Wait a moment for image to fully render
                 setTimeout(() => {
                     // Get actual displayed dimensions
-                    const imgRect = preview.getBoundingClientRect();
-                    const naturalWidth = preview.naturalWidth;
-                    const naturalHeight = preview.naturalHeight;
                     const displayWidth = preview.offsetWidth;
                     const displayHeight = preview.offsetHeight;
                     
@@ -257,11 +254,6 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                     canvas.height = displayHeight;
                     canvas.style.width = displayWidth + 'px';
                     canvas.style.height = displayHeight + 'px';
-                    canvas.style.position = 'absolute';
-                    canvas.style.top = '0px';
-                    canvas.style.left = '0px';
-                    canvas.style.pointerEvents = 'none';
-                    canvas.style.zIndex = '10';
                     
                     // Store references
                     if (imageNum === 1) {
@@ -286,7 +278,7 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                     
                     redrawMasks(imageNum);
                     
-                    console.log(`Image ${imageNum} - Display: ${displayWidth}x${displayHeight}, Natural: ${naturalWidth}x${naturalHeight}`);
+                    console.log(`Image ${imageNum} - Display: ${displayWidth}x${displayHeight}`);
                 }, 100);
             };
         };
