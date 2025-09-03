@@ -1,0 +1,104 @@
+# Version control
+.git
+.gitignore
+
+# Python cache and build files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test and coverage files
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Log files (will be created in container)
+logs/*.log
+*.log
+
+# Upload directory (will be created in container)
+uploads/*
+!uploads/.gitkeep
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Development and CI files
+.pre-commit-config.yaml
+.flake8
+pyproject.toml
+lint.py
+run_coverage.py
+test_working_coverage.py
+coverage_tracker.py
+
+# Screenshots and images (except test data)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+!test/**/*.png
+!test/**/*.jpg
+!test/**/*.jpeg
+
+# Docker files (don't copy into container)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# GitHub and CI
+.github/
+.gitattributes

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  face-comparison-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: face-comparison-web
+    ports:
+      # Map host port 8060 to container port 8060 (NEVER CHANGE - permanent port)
+      - "8060:8060"
+    volumes:
+      # Persist uploaded images and logs
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8060/', timeout=10)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # App needs to write to uploads and logs
+    tmpfs:
+      - /tmp
+    networks:
+      - face-comparison-network
+
+networks:
+  face-comparison-network:
+    driver: bridge
+    name: face-comparison-net
+
+# Optional: Add a volume for persistent data
+volumes:
+  app-data:
+    driver: local

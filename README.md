@@ -49,7 +49,32 @@ A robust Python application with both command-line and web interfaces that compa
 
 ### Usage Options
 
-#### 🌐 Web Interface (Recommended)
+#### 🐳 Docker (Easiest - Recommended)
+
+**Using Docker Compose (one command!):**
+```bash
+docker-compose up --build
+```
+
+Then open your browser to: **http://localhost:8060**
+
+**Or using Docker directly:**
+```bash
+# Build the image
+docker build -t face-comparison-app .
+
+# Run the container
+docker run -p 8060:8060 -v $(pwd)/uploads:/app/uploads -v $(pwd)/logs:/app/logs face-comparison-app
+```
+
+**Benefits:**
+- No dependency installation required
+- Isolated environment
+- Consistent across all systems
+- Automatic health checks
+- Persistent uploads and logs
+
+#### 🌐 Local Web Interface
 
 **Start the web application:**
 ```bash
