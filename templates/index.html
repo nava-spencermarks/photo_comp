@@ -138,6 +138,17 @@ let dragStartY = 0;
 let dragOriginalX = 0;
 let dragOriginalY = 0;
 
+// Resize state
+let isResizing = false;
+let resizedMask = null;
+let resizedImageNum = null;
+let resizeHandle = null; // 'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeOriginalBounds = {};
+
+const RESIZE_HANDLE_SIZE = 8; // pixels for resize handle detection
+
 // Track active masks for each image
 let activeMasks1 = new Set();
 let activeMasks2 = new Set();
@@ -165,7 +176,69 @@ function getMaskAtPosition(x, y, imageNum) {
     return null;
 }
 
-// Mouse event handlers for dragging
+// Helper function to detect resize handle
+function getResizeHandle(x, y, maskType, imageNum) {
+    const canvas = imageNum === 1 ? canvas1 : canvas2;
+    const positions = imageNum === 1 ? maskPositions1 : maskPositions2;
+    const pos = positions[maskType] || RECTANGLE_PATTERNS[maskType];
+    
+    const maskX = pos.x * canvas.width;
+    const maskY = pos.y * canvas.height;
+    const maskWidth = pos.width * canvas.width;
+    const maskHeight = pos.height * canvas.height;
+    
+    const left = maskX;
+    const right = maskX + maskWidth;
+    const top = maskY;
+    const bottom = maskY + maskHeight;
+    
+    // Check corners first (they take priority)
+    if (Math.abs(x - left) <= RESIZE_HANDLE_SIZE && Math.abs(y - top) <= RESIZE_HANDLE_SIZE) {
+        return 'nw';
+    }
+    if (Math.abs(x - right) <= RESIZE_HANDLE_SIZE && Math.abs(y - top) <= RESIZE_HANDLE_SIZE) {
+        return 'ne';
+    }
+    if (Math.abs(x - left) <= RESIZE_HANDLE_SIZE && Math.abs(y - bottom) <= RESIZE_HANDLE_SIZE) {
+        return 'sw';
+    }
+    if (Math.abs(x - right) <= RESIZE_HANDLE_SIZE && Math.abs(y - bottom) <= RESIZE_HANDLE_SIZE) {
+        return 'se';
+    }
+    
+    // Check edges
+    if (Math.abs(x - left) <= RESIZE_HANDLE_SIZE && y >= top && y <= bottom) {
+        return 'w';
+    }
+    if (Math.abs(x - right) <= RESIZE_HANDLE_SIZE && y >= top && y <= bottom) {
+        return 'e';
+    }
+    if (Math.abs(y - top) <= RESIZE_HANDLE_SIZE && x >= left && x <= right) {
+        return 'n';
+    }
+    if (Math.abs(y - bottom) <= RESIZE_HANDLE_SIZE && x >= left && x <= right) {
+        return 's';
+    }
+    
+    return null;
+}
+
+// Helper function to get cursor style for resize handle
+function getResizeCursor(handle) {
+    const cursors = {
+        'n': 'ns-resize',
+        's': 'ns-resize',
+        'e': 'ew-resize',
+        'w': 'ew-resize',
+        'ne': 'nesw-resize',
+        'nw': 'nwse-resize',
+        'se': 'nwse-resize',
+        'sw': 'nesw-resize'
+    };
+    return cursors[handle] || 'default';
+}
+
+// Mouse event handlers for dragging and resizing
 function handleMouseDown(e, imageNum) {
     const canvas = imageNum === 1 ? canvas1 : canvas2;
     const rect = canvas.getBoundingClientRect();
@@ -174,19 +247,42 @@ function handleMouseDown(e, imageNum) {
     
     const mask = getMaskAtPosition(x, y, imageNum);
     if (mask) {
-        isDragging = true;
-        draggedMask = mask;
-        draggedImageNum = imageNum;
-        dragStartX = x;
-        dragStartY = y;
+        const handle = getResizeHandle(x, y, mask, imageNum);
         
-        const positions = imageNum === 1 ? maskPositions1 : maskPositions2;
-        const currentPos = positions[mask] || RECTANGLE_PATTERNS[mask];
-        dragOriginalX = currentPos.x * canvas.width;
-        dragOriginalY = currentPos.y * canvas.height;
-        
-        // Change cursor
-        canvas.style.cursor = 'grabbing';
+        if (handle) {
+            // Start resizing
+            isResizing = true;
+            resizedMask = mask;
+            resizedImageNum = imageNum;
+            resizeHandle = handle;
+            resizeStartX = x;
+            resizeStartY = y;
+            
+            const positions = imageNum === 1 ? maskPositions1 : maskPositions2;
+            const currentPos = positions[mask] || RECTANGLE_PATTERNS[mask];
+            resizeOriginalBounds = {
+                x: currentPos.x * canvas.width,
+                y: currentPos.y * canvas.height,
+                width: currentPos.width * canvas.width,
+                height: currentPos.height * canvas.height
+            };
+            
+            canvas.style.cursor = getResizeCursor(handle);
+        } else {
+            // Start dragging
+            isDragging = true;
+            draggedMask = mask;
+            draggedImageNum = imageNum;
+            dragStartX = x;
+            dragStartY = y;
+            
+            const positions = imageNum === 1 ? maskPositions1 : maskPositions2;
+            const currentPos = positions[mask] || RECTANGLE_PATTERNS[mask];
+            dragOriginalX = currentPos.x * canvas.width;
+            dragOriginalY = currentPos.y * canvas.height;
+            
+            canvas.style.cursor = 'grabbing';
+        }
         e.preventDefault();
     }
 }
@@ -197,35 +293,101 @@ function handleMouseMove(e, imageNum) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    if (isDragging && draggedImageNum === imageNum) {
-        // Calculate new position
-        const deltaX = x - dragStartX;
-        const deltaY = y - dragStartY;
-        const newX = (dragOriginalX + deltaX) / canvas.width;
-        const newY = (dragOriginalY + deltaY) / canvas.height;
+    if (isResizing && resizedImageNum === imageNum) {
+        // Handle resizing
+        const deltaX = x - resizeStartX;
+        const deltaY = y - resizeStartY;
         
-        // Update position for both images (to keep them synchronized)
-        const currentMask = RECTANGLE_PATTERNS[draggedMask];
-        maskPositions1[draggedMask] = {
+        let newX = resizeOriginalBounds.x / canvas.width;
+        let newY = resizeOriginalBounds.y / canvas.height;
+        let newWidth = resizeOriginalBounds.width / canvas.width;
+        let newHeight = resizeOriginalBounds.height / canvas.height;
+        
+        // Update dimensions based on resize handle
+        if (resizeHandle.includes('w')) {
+            const newLeft = (resizeOriginalBounds.x + deltaX) / canvas.width;
+            const newRight = (resizeOriginalBounds.x + resizeOriginalBounds.width) / canvas.width;
+            if (newLeft < newRight) {
+                newX = newLeft;
+                newWidth = newRight - newLeft;
+            }
+        }
+        if (resizeHandle.includes('e')) {
+            newWidth = (resizeOriginalBounds.width + deltaX) / canvas.width;
+            if (newWidth < 0.05) newWidth = 0.05; // Minimum width
+        }
+        if (resizeHandle.includes('n')) {
+            const newTop = (resizeOriginalBounds.y + deltaY) / canvas.height;
+            const newBottom = (resizeOriginalBounds.y + resizeOriginalBounds.height) / canvas.height;
+            if (newTop < newBottom) {
+                newY = newTop;
+                newHeight = newBottom - newTop;
+            }
+        }
+        if (resizeHandle.includes('s')) {
+            newHeight = (resizeOriginalBounds.height + deltaY) / canvas.height;
+            if (newHeight < 0.05) newHeight = 0.05; // Minimum height
+        }
+        
+        // Update positions for both images (synchronized)
+        maskPositions1[resizedMask] = {
             x: newX,
             y: newY,
-            width: currentMask.width,
-            height: currentMask.height
+            width: newWidth,
+            height: newHeight
         };
-        maskPositions2[draggedMask] = {
+        maskPositions2[resizedMask] = {
             x: newX,
             y: newY,
-            width: currentMask.width,
-            height: currentMask.height
+            width: newWidth,
+            height: newHeight
         };
         
         // Redraw both canvases
         redrawMasks(1);
         redrawMasks(2);
-    } else if (!isDragging) {
+        
+    } else if (isDragging && draggedImageNum === imageNum) {
+        // Calculate new position for dragging
+        const deltaX = x - dragStartX;
+        const deltaY = y - dragStartY;
+        const newX = (dragOriginalX + deltaX) / canvas.width;
+        const newY = (dragOriginalY + deltaY) / canvas.height;
+        
+        // Get current dimensions
+        const positions = imageNum === 1 ? maskPositions1 : maskPositions2;
+        const currentPos = positions[draggedMask] || RECTANGLE_PATTERNS[draggedMask];
+        
+        // Update position for both images (to keep them synchronized)
+        maskPositions1[draggedMask] = {
+            x: newX,
+            y: newY,
+            width: currentPos.width,
+            height: currentPos.height
+        };
+        maskPositions2[draggedMask] = {
+            x: newX,
+            y: newY,
+            width: currentPos.width,
+            height: currentPos.height
+        };
+        
+        // Redraw both canvases
+        redrawMasks(1);
+        redrawMasks(2);
+    } else if (!isDragging && !isResizing) {
         // Update cursor based on hover
         const mask = getMaskAtPosition(x, y, imageNum);
-        canvas.style.cursor = mask ? 'grab' : 'default';
+        if (mask) {
+            const handle = getResizeHandle(x, y, mask, imageNum);
+            if (handle) {
+                canvas.style.cursor = getResizeCursor(handle);
+            } else {
+                canvas.style.cursor = 'grab';
+            }
+        } else {
+            canvas.style.cursor = 'default';
+        }
     }
 }
 
@@ -238,10 +400,21 @@ function handleMouseUp(e, imageNum) {
         const canvas = imageNum === 1 ? canvas1 : canvas2;
         canvas.style.cursor = 'move';
     }
+    
+    if (isResizing) {
+        isResizing = false;
+        resizedMask = null;
+        resizedImageNum = null;
+        resizeHandle = null;
+        
+        const canvas = imageNum === 1 ? canvas1 : canvas2;
+        canvas.style.cursor = 'move';
+    }
 }
 
 function handleMouseLeave(e, imageNum) {
-    if (isDragging && draggedImageNum === imageNum) {
+    if ((isDragging && draggedImageNum === imageNum) || 
+        (isResizing && resizedImageNum === imageNum)) {
         handleMouseUp(e, imageNum);
     }
 }
@@ -347,11 +520,37 @@ function redrawMasks(imageNum) {
             ctx.fillStyle = '#555555';
             ctx.fillRect(x, y, width, height);
             
-            // Add border when being dragged for better visual feedback
-            if (isDragging && draggedMask === maskType) {
+            // Add border when being dragged or resized for better visual feedback
+            if ((isDragging && draggedMask === maskType) || 
+                (isResizing && resizedMask === maskType)) {
                 ctx.strokeStyle = '#ff0000';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x, y, width, height);
+                
+                // Draw resize handles when resizing
+                if (isResizing && resizedMask === maskType) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 1;
+                    
+                    // Corner handles
+                    const handleSize = 6;
+                    const handles = [
+                        [x - handleSize/2, y - handleSize/2],  // nw
+                        [x + width - handleSize/2, y - handleSize/2],  // ne
+                        [x - handleSize/2, y + height - handleSize/2],  // sw
+                        [x + width - handleSize/2, y + height - handleSize/2],  // se
+                        [x + width/2 - handleSize/2, y - handleSize/2],  // n
+                        [x + width/2 - handleSize/2, y + height - handleSize/2],  // s
+                        [x - handleSize/2, y + height/2 - handleSize/2],  // w
+                        [x + width - handleSize/2, y + height/2 - handleSize/2]  // e
+                    ];
+                    
+                    handles.forEach(([hx, hy]) => {
+                        ctx.fillRect(hx, hy, handleSize, handleSize);
+                        ctx.strokeRect(hx, hy, handleSize, handleSize);
+                    });
+                }
             }
         }
     });
