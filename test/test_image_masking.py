@@ -93,7 +93,7 @@ class ImageMaskingTestCase(unittest.TestCase):
 
         # Out of bounds coordinates - should be clamped, not rejected
         invalid_data = [{"x": 0.8, "y": 0.2, "width": 0.3, "height": 0.4}]
- 
+
         json_str = json.dumps(invalid_data)
         parsed = self.masker.parse_rectangle_data(json_str)
         # Should clamp width to fit within bounds

@@ -112,7 +112,6 @@ class ImageMasker:
             # Only draw if rectangle has positive area
             if x2 > x1 and y2 > y1:
                 draw.rectangle([x1, y1, x2 - 1, y2 - 1], fill=255)
- 
 
         # Convert back to numpy array
         mask = np.array(mask_img) > 0
