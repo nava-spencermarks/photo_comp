@@ -84,8 +84,7 @@ Customize `templates/result.html` for different result presentations.
 
 ### Port Already in Use
 ```bash
-# Run on different port
-export FLASK_PORT=5001
+# Application runs on port 8060 (default and permanent)
 python run_webapp.py
 ```
 

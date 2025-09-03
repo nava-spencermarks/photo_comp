@@ -237,4 +237,5 @@ def view_logs():
 
 
 if __name__ == '__main__':
+    # DO NOT CHANGE PORT 8060 - This is the permanent default port for this application
     app.run(debug=True, host='0.0.0.0', port=8060)

@@ -56,7 +56,7 @@ A robust Python application with both command-line and web interfaces that compa
 python app.py
 ```
 
-Then open your browser to: **http://localhost:8080**
+Then open your browser to: **http://localhost:8060**
 
 **Features:**
 - Upload two images using the web interface
@@ -316,9 +316,8 @@ pip install -r requirements.txt
 
 ### Web Interface Issues
 ```bash
-# If port 8080 is already in use, edit app.py:
-# Change: app.run(debug=True, host='0.0.0.0', port=8080)
-# To:     app.run(debug=True, host='0.0.0.0', port=8081)
+# Application runs on port 8060 by default
+# Access at: http://localhost:8060
 
 # If upload fails, check folder permissions:
 mkdir -p uploads
