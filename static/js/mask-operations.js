@@ -33,7 +33,7 @@ function toggleMask(maskType, imageNum) {
     }
     
     // Update ALL button appearances (both image sets)
-    const allButtons = document.querySelectorAll(`button[onclick*="toggleMask('${maskType}',"]`);
+    const allButtons = document.querySelectorAll(`button[data-mask-type="${maskType}"].mask-btn`);
     allButtons.forEach(btn => {
         if (activeMasks1.has(maskType)) {
             btn.classList.add('active');
@@ -41,6 +41,10 @@ function toggleMask(maskType, imageNum) {
             btn.classList.remove('active');
         }
     });
+    
+    // Update preset button states
+    updatePresetButtonStates(1);
+    updatePresetButtonStates(2);
     
     // Redraw masks on both images
     redrawMasks(1);
@@ -62,6 +66,12 @@ function clearAllMasks(imageNum) {
     // Update ALL button appearances
     const allButtons = document.querySelectorAll('.mask-btn');
     allButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Update preset button states
+    const allPresetButtons = document.querySelectorAll('.preset-btn');
+    allPresetButtons.forEach(btn => {
         btn.classList.remove('active');
     });
     

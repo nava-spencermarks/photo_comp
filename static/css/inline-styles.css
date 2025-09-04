@@ -54,6 +54,10 @@
     gap: 0.5rem;
 }
 
+.preset-buttons {
+    margin-bottom: 0.5rem;
+}
+
 .action-buttons {
     display: flex;
     gap: 0.5rem;

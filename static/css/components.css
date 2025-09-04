@@ -116,6 +116,57 @@
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
+.preset-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    min-width: 80px;
+}
+
+.preset-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.preset-btn.active {
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    transform: none;
+}
+
+.preset-btn.preset-btn-eyes {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.preset-btn.preset-btn-eyes:hover {
+    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+}
+
+.preset-btn.preset-btn-eyes.active {
+    background: linear-gradient(135deg, #0D47A1 0%, #01579B 100%);
+}
+
+.preset-btn.preset-btn-nose {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+}
+
+.preset-btn.preset-btn-nose:hover {
+    background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.preset-btn.preset-btn-nose.active {
+    background: linear-gradient(135deg, #E65100 0%, #BF360C 100%);
+}
+
 .upload-area {
     border: 2px dashed #ddd;
     border-radius: 8px;
