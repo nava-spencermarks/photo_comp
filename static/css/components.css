@@ -87,6 +87,19 @@
     background: #764ba2;
 }
 
+.btn-small.btn-orange {
+    background: #FF9800;
+}
+
+.btn-small.btn-orange:hover {
+    background: #F57C00;
+}
+
+.btn-small.btn-orange.active {
+    background: #E65100;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
 .mask-btn {
     background: #667eea;
     color: white;
