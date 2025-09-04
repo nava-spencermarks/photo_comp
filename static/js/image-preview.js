@@ -25,6 +25,7 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
             preview.src = e.target.result;
             preview.onload = function() {
                 container.style.display = 'block';
+                container.classList.add('active');
                 
                 // Wait a moment for image to fully render
                 setTimeout(() => {
@@ -69,11 +70,9 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                     }
                     
                     // Update button states
-                    const buttons = document.querySelectorAll(`button[onclick*="${imageNum}"]`);
+                    const buttons = document.querySelectorAll(`button[data-image-id="${imageNum}"].mask-btn`);
                     buttons.forEach(btn => {
-                        if (btn.classList.contains('mask-btn')) {
-                            btn.classList.remove('active');
-                        }
+                        btn.classList.remove('active');
                     });
                     
                     redrawMasks(imageNum);

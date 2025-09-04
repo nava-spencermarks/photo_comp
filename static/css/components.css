@@ -71,6 +71,22 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.btn-small.btn-red {
+    background: #f44336;
+}
+
+.btn-small.btn-red:hover {
+    background: #d32f2f;
+}
+
+.btn-small.btn-purple {
+    background: #667eea;
+}
+
+.btn-small.btn-purple:hover {
+    background: #764ba2;
+}
+
 .mask-btn {
     background: #667eea;
     color: white;
@@ -84,6 +100,14 @@
 }
 
 .mask-btn:hover {
+    background: #5a6fd8;
+}
+
+.mask-btn.mask-btn-purple {
+    background: #667eea;
+}
+
+.mask-btn.mask-btn-purple:hover {
     background: #5a6fd8;
 }
 

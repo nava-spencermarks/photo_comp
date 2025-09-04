@@ -12,34 +12,34 @@
                         <input type="file" id="image1" name="image1" class="file-input" 
                                accept="image/*" required>
                     </div>
-                    <p style="color: #666; font-size: 0.9rem;">
+                    <p class="upload-hint">
                         Supported formats: PNG, JPG, JPEG, GIF, BMP
                     </p>
                 </div>
-                <div class="image-canvas-container" id="canvas-container-1" style="display: none;">
-                    <div style="position: relative; display: inline-block; margin: 0 auto;">
-                        <img id="preview1" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease; display: block;">
-                        <canvas id="canvas1" style="position: absolute; top: 0; left: 0; cursor: move;"></canvas>
+                <div class="image-canvas-container" id="canvas-container-1">
+                    <div class="image-wrapper">
+                        <img id="preview1" class="image-preview">
+                        <canvas id="canvas1" class="canvas-overlay"></canvas>
                     </div>
                     <div class="canvas-controls">
-                        <div style="margin-bottom: 1rem;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: #555;">Mask Areas:</div>
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_top', 1)" style="background: #667eea;">Top Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_middle', 1)" style="background: #667eea;">Middle Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_bottom', 1)" style="background: #667eea;">Bottom Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_left', 1)" style="background: #667eea;">Left Side</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_right', 1)" style="background: #667eea;">Right Side</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_center', 1)" style="background: #667eea;">Center</button>
+                        <div class="mask-controls">
+                            <div class="mask-controls-title">Mask Areas:</div>
+                            <div class="mask-buttons">
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_top" data-image-id="1">Top Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_middle" data-image-id="1">Middle Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_bottom" data-image-id="1">Bottom Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_left" data-image-id="1">Left Side</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_right" data-image-id="1">Right Side</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_center" data-image-id="1">Center</button>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button type="button" class="btn-small" onclick="clearAllMasks(1)" style="background: #f44336;">🗑️ Clear All</button>
-                            <button type="button" class="btn-small" onclick="flipImage('preview1')" style="background: #667eea;">🔄 Flip Upside Down</button>
+                        <div class="action-buttons">
+                            <button type="button" class="btn-small btn-clear-masks btn-red" data-image-id="1">🗑️ Clear All</button>
+                            <button type="button" class="btn-small btn-flip-image btn-purple" data-preview-id="preview1">🔄 Flip Upside Down</button>
                         </div>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                        <div class="mask-hint">
                             <div>Click buttons to add rectangle masks</div>
-                            <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
+                            <div class="mask-hint-detail">
                                 Active masks show with darker buttons
                             </div>
                         </div>
@@ -55,34 +55,34 @@
                         <input type="file" id="image2" name="image2" class="file-input" 
                                accept="image/*" required>
                     </div>
-                    <p style="color: #666; font-size: 0.9rem;">
+                    <p class="upload-hint">
                         Supported formats: PNG, JPG, JPEG, GIF, BMP
                     </p>
                 </div>
-                <div class="image-canvas-container" id="canvas-container-2" style="display: none;">
-                    <div style="position: relative; display: inline-block; margin: 0 auto;">
-                        <img id="preview2" style="max-width: 300px; max-height: 300px; border-radius: 6px; transition: transform 0.3s ease; display: block;">
-                        <canvas id="canvas2" style="position: absolute; top: 0; left: 0; cursor: move;"></canvas>
+                <div class="image-canvas-container" id="canvas-container-2">
+                    <div class="image-wrapper">
+                        <img id="preview2" class="image-preview">
+                        <canvas id="canvas2" class="canvas-overlay"></canvas>
                     </div>
                     <div class="canvas-controls">
-                        <div style="margin-bottom: 1rem;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: #555;">Mask Areas:</div>
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_top', 2)" style="background: #667eea;">Top Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_middle', 2)" style="background: #667eea;">Middle Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_bottom', 2)" style="background: #667eea;">Bottom Bar</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_left', 2)" style="background: #667eea;">Left Side</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_right', 2)" style="background: #667eea;">Right Side</button>
-                                <button type="button" class="mask-btn" onclick="toggleMask('rect_center', 2)" style="background: #667eea;">Center</button>
+                        <div class="mask-controls">
+                            <div class="mask-controls-title">Mask Areas:</div>
+                            <div class="mask-buttons">
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_top" data-image-id="2">Top Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_middle" data-image-id="2">Middle Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_bottom" data-image-id="2">Bottom Bar</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_left" data-image-id="2">Left Side</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_right" data-image-id="2">Right Side</button>
+                                <button type="button" class="mask-btn mask-btn-purple" data-mask-type="rect_center" data-image-id="2">Center</button>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button type="button" class="btn-small" onclick="clearAllMasks(2)" style="background: #f44336;">🗑️ Clear All</button>
-                            <button type="button" class="btn-small" onclick="flipImage('preview2')" style="background: #667eea;">🔄 Flip Upside Down</button>
+                        <div class="action-buttons">
+                            <button type="button" class="btn-small btn-clear-masks btn-red" data-image-id="2">🗑️ Clear All</button>
+                            <button type="button" class="btn-small btn-flip-image btn-purple" data-preview-id="preview2">🔄 Flip Upside Down</button>
                         </div>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                        <div class="mask-hint">
                             <div>Click buttons to add rectangle masks</div>
-                            <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #888;">
+                            <div class="mask-hint-detail">
                                 Active masks show with darker buttons
                             </div>
                         </div>
@@ -91,7 +91,7 @@
             </div>
         </div>
         
-        <div style="text-align: center; margin-top: 2rem;">
+        <div class="submit-section">
             <button type="submit" class="btn">
                 🔍 Compare Faces
             </button>
@@ -100,8 +100,8 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom: 1rem; color: #555;">How it works:</h3>
-    <ol style="color: #666; line-height: 1.6;">
+    <h3 class="instructions-title">How it works:</h3>
+    <ol class="instructions-list">
         <li>Upload two images containing faces</li>
         <li>Our AI analyzes the facial features in both images</li>
         <li>Get instant results showing if it's the same person</li>
@@ -116,5 +116,6 @@
 <script src="{{ url_for('static', filename='js/mouse-handlers.js') }}"></script>
 <script src="{{ url_for('static', filename='js/mask-operations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/image-preview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/button-handlers.js') }}"></script>
 <script src="{{ url_for('static', filename='js/form-submission.js') }}"></script>
 {% endblock %}
