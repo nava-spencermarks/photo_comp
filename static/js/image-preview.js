@@ -75,6 +75,11 @@ function previewImage(input, previewId, canvasId, containerId, imageNum) {
                         btn.classList.remove('active');
                     });
                     
+                    // Reset zoom level for new image
+                    if (typeof resetZoom === 'function') {
+                        resetZoom(imageNum);
+                    }
+                    
                     redrawMasks(imageNum);
                     
                     console.log(`Image ${imageNum} - Display: ${displayWidth}x${displayHeight}`);
